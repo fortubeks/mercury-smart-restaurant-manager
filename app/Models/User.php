@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'last_name',
         'role_id',
         'restaurant_id',
+        'outlet_id',
         'user_id',
         'password',
         'is_active',
@@ -62,19 +64,34 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        // Define the created event listener
-        static::created(function ($model) {
-            //if the created user is a super admin, create a restaurant and assign it to the user
-            if ($model->is_super_admin) {
-                $restaurant = Restaurant::create(['user_id' => $model->id, 'name' => $model->name]);
+        static::created(function ($user) {
+            // Only proceed if the user is a super admin
+            if ($user->is_super_admin) {
+                DB::transaction(function () use ($user) {
+                    // Create a restaurant for the super admin
+                    $restaurant = Restaurant::create([
+                        'user_id' => $user->id,
+                        'name' => 'Main Restaurant',
+                    ]);
 
-                $model->restaurant_id = $restaurant->id;
-                $model->user_id = $model->id;
-                $model->save();
+                    // Create an outlet under the restaurant
+                    $outlet = Outlet::create([
+                        'restaurant_id' => $restaurant->id,
+                        'name' => 'Main Outlet',
+                    ]);
+
+                    // Update the user with the new relationships
+                    $user->update([
+                        'restaurant_id' => $restaurant->id,
+                        'outlet_id' => $outlet->id,
+                    ]);
+                });
             }
 
-            // Sync the roles based on the role name
-            $model->roles()->sync($model->getRoleIds());
+            // Assign roles if any
+            if (method_exists($user, 'getRoleIds') && $user->getRoleIds()) {
+                $user->roles()->sync($user->getRoleIds());
+            }
         });
     }
 
@@ -116,6 +133,21 @@ class User extends Authenticatable
     public function restaurants()
     {
         return $this->hasMany(Restaurant::class);
+    }
+
+    public function userAccount()
+    {
+        return $this->hasOne(User::class, 'user_id');
+    }
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
+    }
+
+    public function defaultRestaurant()
+    {
+        return $this->restaurant()->first();
     }
 
     public function getRoleIds()

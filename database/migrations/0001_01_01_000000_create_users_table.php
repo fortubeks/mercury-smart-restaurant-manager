@@ -20,6 +20,9 @@ return new class extends Migration
             $table->rememberToken();
             $table->string('phone')->unique();
             $table->unsignedBigInteger('role_id')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login')->nullable();
+            $table->string('profile_image')->nullable();
             $table->foreignId('user_id')->nullable(); // define the column first
             $table->string('google_id')->nullable();
             $table->timestamps();

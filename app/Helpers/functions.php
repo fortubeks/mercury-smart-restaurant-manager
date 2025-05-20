@@ -88,14 +88,28 @@ if (!function_exists('arrayToObject')) {
         }
     }
 }
+
+function getSettings()
+{
+    return restaurant()->appSetting;
+}
+
+if (!function_exists('activeModule')) {
+    function activeModule($module)
+    {
+        return getSettings()->{$module};
+    }
+}
+
 function formatCurrency($amount)
 {
     return "₦" . number_format($amount, 2);
 }
 function getModelList($model)
 {
-    $restaurant = auth()->user()->restaurant;
-    $restaurant_id = auth()->user()->restaurant_id;
+    $user = auth()->user();
+    $restaurant = $user->restaurant;
+    $restaurant_id = $user->restaurant_id;
 
     return match ($model) {
         'countries' => DB::select('select id, name from countries'),
@@ -115,7 +129,7 @@ function getModelList($model)
         'taxes' => Tax::where('restaurant_id', $restaurant_id)->where('Active', true)->get(),
         'outlets' => Outlet::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'bar-outlets' => Outlet::where('restaurant_id', $restaurant_id)->where('type', 'bar')->get(),
-        'restaurant-outlets' => Outlet::where('restaurant_id', $restaurant_id)->where('type', 'restaurant')->get(),
+        'restaurant-outlets' => Outlet::where('restaurant_id', $restaurant_id)->get(),
         'kitchen-outlets' => Outlet::where('restaurant_id', $restaurant_id)->where('type', 'kitchen')->get(),
         'kitchen-store-items' => StoreItem::where('store_id', $restaurant->store->id)
             ->where('item_category_id', 1)
@@ -124,7 +138,7 @@ function getModelList($model)
             ->get(),
         'housekeepers' => User::where('restaurant_id', $restaurant_id)->where('role', 'Housekeeper')->get(),
         'roles' => Role::all(),
-        'property-types' => ['restaurant' => 'restaurant', 'apartment' => 'Shortlets/Apartments'],
+        'restaurant-types' => ['restaurant' => 'Restaurant', 'fast-food' => 'Fast Food'],
         'parent-expense-categories' => ExpenseCategory::where('restaurant_id', 0)->orderBy('name')->get(),
         'bank-accounts' => BankAccount::where('restaurant_id', $restaurant_id)->orderBy('account_name')->get(),
         'companies' => Company::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
@@ -288,6 +302,10 @@ function restaurant()
     return auth()->user()->userAccount->restaurant;
 }
 
+function restaurants()
+{
+    return auth()->user()->userAccount->restaurants;
+}
 
 function removeUnderscore($string)
 {
@@ -387,6 +405,79 @@ function formatTime($timeAttribute)
 function formatDateSpecial($date)
 {
     return \Carbon\Carbon::createFromFormat('Y-m-d', $date)->format('jS, M Y');
+}
+
+function userRestaurantOutlet()
+{
+    $user = auth()->user();
+    $defaultRestaurant = $user->restaurant->defaultRestaurant();
+
+    // Use null coalescing operator to simplify condition
+    $restaurant_outlet = $user->outlet ?? $defaultRestaurant;
+
+    // Ensure the outlet is of type 'restaurant', otherwise fallback to default restaurant
+    return $restaurant_outlet && $restaurant_outlet->type == 'restaurant'
+        ? $restaurant_outlet
+        : $defaultRestaurant;
+}
+
+function eraseDuplicateCreditPayment($order)
+{
+    $payments = $order->payments;
+    $isCreditOrder = false;
+    // Check if there is a credit payment
+    $creditPayments = $payments->filter(function ($payment) {
+        return $payment->payment_method == 'credit';
+    });
+
+    if ($creditPayments->isNotEmpty()) {
+        // Calculate the sum of non-credit payments
+        $nonCreditSum = $payments->filter(function ($payment) {
+            return $payment->payment_method != 'credit';
+        })->sum('amount');
+
+        // If the sum of non-credit payments equals or exceeds the order amount
+        //if the order has total_amount use it else use amount
+        $amount = $order->amount;
+        if ($order->total_amount) {
+            $amount = $order->total_amount;
+        }
+        if ($nonCreditSum >= $amount) {
+            // Delete all credit payments
+            foreach ($creditPayments as $creditPayment) {
+                $creditPayment->delete();
+            }
+
+            $isCreditOrder = true;
+        }
+    }
+    return $isCreditOrder;
+}
+
+function getPayerWallet($payer, $invoice)
+{
+    if ($invoice->company_id) {
+        $payer = Company::find($invoice->company_id);
+    }
+
+    $wallet = get_class($payer) == Company::class ? $payer->companyWallet : $payer->guestWallet;
+    return $wallet;
+}
+
+function eraseCreditPayment($order)
+{
+    $payments = $order->payments;
+    // Check if there is a credit payment
+    $creditPayments = $payments->filter(function ($payment) {
+        return $payment->payment_method == 'credit';
+    });
+
+    if ($creditPayments->isNotEmpty()) {
+        // Delete all credit payments
+        foreach ($creditPayments as $creditPayment) {
+            $creditPayment->delete();
+        }
+    }
 }
 
 function sendEbulkSms($recipients, $message)

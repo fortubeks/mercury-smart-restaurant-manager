@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('restaurant_id')->nullable()->after('role_id');
+            $table->foreignId('outlet_id')->nullable()->after('restaurant_id');
         });
     }
 
@@ -24,6 +25,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['restaurant_id']);
             $table->dropColumn('restaurant_id');
+            $table->dropForeign(['outlet_id']);
+            $table->dropColumn('outlet_id');
         });
     }
 };

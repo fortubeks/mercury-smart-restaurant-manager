@@ -13,6 +13,24 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('outlet_id')->constrained()->onDelete('cascade');
+            $table->foreignId('created_by')->constrained('users'); // The staff handling the order
+            $table->foreignId('customer_id')->nullable()->constrained()->onDelete('set null');;
+            $table->foreignId('delivery_area_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('served_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->date('order_date'); //shift
+            $table->string('status')->default('settled'); //open,settled
+            $table->string('payment_status')->default('pending');
+            $table->string('reference')->unique()->nullable();
+            $table->decimal('amount');
+            $table->decimal('tax_rate')->default(0.00);
+            $table->decimal('tax_amount')->default(0.00);
+            $table->decimal('discount_rate')->default(0.00);
+            $table->string('discount_type')->default('flat');
+            $table->decimal('discount_amount')->default(0.00);
+            $table->decimal('total_amount');
+            $table->string('delivery_address')->nullable(); // Free-text address
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

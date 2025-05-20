@@ -14,9 +14,17 @@ class Restaurant extends Model
         'website',
         'user_id',
         'logo',
+        'country_id',
+        'state_id',
+        'restaurant_type'
     ];
     public function getIsRestaurantProfileCompleteAttribute()
     {
-        return $this->name;
+        return $this->name && $this->address && $this->phone && $this->country_id && $this->state_id;
+    }
+
+    public function appSetting()
+    {
+        return $this->hasOne(AppSetting::class);
     }
 }

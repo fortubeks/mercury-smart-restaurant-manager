@@ -1,12 +1,4 @@
 @extends('dashboard.layouts.app')
-
-<style>
-    .user-photo {
-        width: 40px;
-        height: auto;
-    }
-</style>
-
 @section('contents')
 <div class="page-content">
     <!--breadcrumb-->
