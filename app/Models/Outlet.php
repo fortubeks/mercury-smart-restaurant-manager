@@ -14,7 +14,9 @@ class Outlet extends Model
 
         static::created(function ($outlet) {
             //set user outlet to this created outlet
-            auth()->user()->update(['outlet_id' => $outlet->id]);
+            if (auth()->check()) {
+                auth()->user()->update(['outlet_id' => $outlet->id]);
+            }
         });
     }
 }
