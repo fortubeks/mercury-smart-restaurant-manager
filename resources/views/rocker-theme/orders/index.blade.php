@@ -18,7 +18,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="ms-auto"><a href="{{url('restaurant-orders/create')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Create New Order</a></div>
+                    <div class="ms-auto"><a href="{{url('orders/create')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Create New Order</a></div>
                 </div>
                 <div class="table-responsive">
                     <table class="table mb-0">
@@ -32,7 +32,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($restaurantCartOrders as $key => $order)
+                            @forelse($cartOrders as $key => $order)
                             <tr>
                                 <td>{{ Carbon\Carbon::createFromTimestamp($order['restaurantCartOrderId'])->format('H:i:s') }}</td>
                                 <td>
@@ -42,9 +42,9 @@
                                 <td>{{Carbon\Carbon::createFromTimestamp($order['restaurantCartOrderId'])->format('g:iA') }}</td>
                                 <td>
                                     <div class="d-flex order-actions">
-                                        <a title="Edit" href="{{url('restaurant-cart/edit?id='.$order['restaurantCartOrderId'])}}"><i class="bx bxs-edit"></i></a>
-                                        <a class="ms-3" title="Print Bill" href="{{ url('restaurant-order/print-cart/'. $order['restaurantCartOrderId'] ) }}"><i class="bx bxs-printer"></i> </a>
-                                        <a class="ms-3" title="Print Docket" href="{{ url('restaurant-order/print-docket/'. $order['restaurantCartOrderId'] ) }}"><i class="bx bxs-copy-alt"></i> </a>
+                                        <a title="Edit" href="{{url('cart/edit?id='.$order['restaurantCartOrderId'])}}"><i class="bx bxs-edit"></i></a>
+                                        <a class="ms-3" title="Print Bill" href="{{ url('printer/cart/'. $order['restaurantCartOrderId'] ) }}"><i class="bx bxs-printer"></i> </a>
+                                        <a class="ms-3" title="Print Kitchen Slip" href="{{ url('printer/kitchen-slip/'. $order['restaurantCartOrderId'] ) }}"><i class="bx bxs-copy-alt"></i> </a>
                                         <a href="javascript:void(0);" class="ms-3 delete-cart" data-order-id="{{ $order['restaurantCartOrderId'] }}" data-bs-toggle="modal" data-bs-target="#deleteCartModal"><i class="bx bxs-trash"></i></a>
                                     </div>
                                 </td>
@@ -74,7 +74,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="restaurant-order-data-table" class="table mb-0">
+                    <table id="order-data-table" class="table mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th>Time</th>
@@ -92,18 +92,17 @@
                             <tr>
                                 <td>{{$order->created_at->format('g:iA')}}</td>
                                 <td>
-                                    <a href="{{url('restaurant-orders/'.$order->id)}}">{{$order->id}}</a>
+                                    <a href="{{route('orders.show',$order->id)}}">{{$order->id}}</a>
                                 </td>
                                 <td>
-                                    @if ($order->guest)
-                                    <a href="{{ url('guests/' . $order->guest->id) }}">{{ $order->guest->name() }}</a>
+                                    @if ($order->customer)
+                                    <a href="{{route('customers.show',$order->customer->id)}}">{{ $order->customer->name() }}</a>
                                     @else
-                                    Walkin Guest
+                                    Walkin Customer
                                     @endif
                                 </td>
                                 <td>{{$order->items_string }}</td>
-
-                                <td>@if($order->hasBeenPaid())
+                                <td>@if($order->status == 'settled')
                                     <div class="badge rounded-pill text-success bg-light-success p-2 text-uppercase px-3">
                                         <i class="bx bxs-circle me-1"></i>Settled
                                     </div>
@@ -117,10 +116,10 @@
                                 <td>{{$order->payment_details}}</td>
                                 <td>
                                     <div class="d-flex order-actions">
-                                        <a href="{{url('restaurant-orders/'.$order->id)}}" class=""><i class="bx bxs-show"></i></a>
-                                        <a class="ms-3" href="{{url('restaurant-order/print/'.$order->id)}}" class=""><i class="bx bxs-printer"></i></a>
+                                        <a href="{{route('orders.show',$order->id)}}" class=""><i class="bx bxs-show"></i></a>
+                                        <a class="ms-3" href="{{url('order/print/'.$order->id)}}" class=""><i class="bx bxs-printer"></i></a>
                                         @role('Manager')
-                                        <a class="ms-3 delete-order" href="javascript:void(0);" data-order-id="{{$order->id}}" data-bs-toggle="modal" data-bs-target="#deleteOrderModal"><i class="bx bxs-trash"></i></a>
+                                        <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$order->id}}" data-resource-url="{{url('orders')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
                                         @endrole
                                     </div>
                                 </td>
@@ -146,11 +145,11 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this restaurant cart order?
+                    Are you sure you want to delete this cart order?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="POST" action="{{url('restaurant-cart/delete')}}">
+                    <form method="POST" action="{{url('cart/delete')}}">
                         @csrf
                         <input type="hidden" name="restaurant_cart_order_id" id="deleteCartIdInput" value="">
                         <button type="submit" class="btn btn-danger">Yes, Delete</button>
@@ -159,37 +158,13 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteRestaurantOrderModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteCartModalLabel">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this restaurant order?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form method="POST" id="order-form" action="{{url('restaurant-orders/')}}">
-                        @csrf @method('delete')
-                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('rocker-theme.layouts.partials.delete-modal')
 </div>
 
 <script>
     window.addEventListener('load', function() {
-        var outletId = $('#outlet').data('outlet');
-        // Set the selected option based on the outlet id
-        if (outletId) {
-            $('#outlet').val(outletId);
-        }
 
-        var restaurant_order_table = $('#restaurant-order-data-table').DataTable({
+        var restaurant_order_table = $('#order-data-table').DataTable({
             lengthChange: true,
             buttons: [{
                     extend: 'excel',
@@ -214,43 +189,12 @@
             ],
         });
 
-        restaurant_order_table.buttons().container().appendTo('#restaurant-order-data-table_wrapper .col-md-6:eq(0)');
+        restaurant_order_table.buttons().container().appendTo('#order-data-table_wrapper .col-md-6:eq(0)');
 
         $('.delete-cart').click(function() {
             var orderId = $(this).data('orderId');
             $('#deleteCartIdInput').val(orderId);
         });
-        $(".delete-order").click(function(event) {
-            var orderId = $(this).data('order-id');
-            var baseUrl = "{{ url('restaurant-orders') }}";
 
-            // Construct the new URL with appended restaurant order ID
-            var newUrl = baseUrl + "/" + orderId;
-
-            // Update the form action attribute with the new URL
-            $("#order-form").attr("action", newUrl);
-        });
-
-        $('#outlet').change(function() {
-            // Get the selected value
-            var selectedOutletId = $(this).val();
-
-            // Send an AJAX GET request to update session value
-            $.ajax({
-                url: "{{ url('set-outlet') }}",
-                method: 'post',
-                data: {
-                    outlet_id: selectedOutletId,
-                    _token: '{{ csrf_token() }}' // Add CSRF token for Laravel
-                },
-                success: function(response) {
-                    window.location.reload(); // Reload the page after successful update
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    // Handle errors if needed
-                }
-            });
-        });
     });
 </script>

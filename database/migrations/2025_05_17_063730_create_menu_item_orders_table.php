@@ -13,6 +13,20 @@ return new class extends Migration
     {
         Schema::create('menu_item_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->foreignId('menu_item_id')->constrained()->onDelete('cascade');
+
+            $table->decimal('qty', 10, 2); // Specify precision
+            $table->decimal('amount', 10, 2); // price * qty before tax/discount
+
+            $table->decimal('tax_rate', 5, 2)->default(0); // percentage e.g. 7.5
+            $table->decimal('tax_amount', 10, 2)->default(0);
+
+            $table->decimal('discount_rate', 5, 2)->default(0); // percentage
+            $table->enum('discount_type', ['percentage', 'flat'])->default('percentage');
+            $table->decimal('discount_amount', 10, 2)->default(0);
+
+            $table->decimal('total_amount', 10, 2); // amount + tax - discount
             $table->timestamps();
         });
     }

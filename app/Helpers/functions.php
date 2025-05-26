@@ -7,6 +7,8 @@ use App\Models\AssetCategory;
 use App\Models\AssetLocation;
 use App\Models\BankAccount;
 use App\Models\Company;
+use App\Models\Customer;
+use App\Models\DeliveryArea;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ExpenseItem;
@@ -16,6 +18,7 @@ use App\Models\restaurant;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSubCategory;
+use App\Models\MenuCategory;
 use App\Models\Outlet;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
@@ -110,6 +113,7 @@ function getModelList($model)
     $user = auth()->user();
     $restaurant = $user->restaurant;
     $restaurant_id = $user->restaurant_id;
+    $outlet_id = outlet()->id;
 
     return match ($model) {
         'countries' => DB::select('select id, name from countries'),
@@ -124,12 +128,14 @@ function getModelList($model)
         'item-sub_categories' => ItemSubCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'rooms' => Room::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'venues' => Venue::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
-        'guests' => Guest::where('restaurant_id', $restaurant_id)->orderBy('first_name')->get(),
+        'customers' => Customer::where('restaurant_id', $restaurant_id)->orderBy('first_name')->get(),
         'gym-members' => GymMember::where('restaurant_id', $restaurant_id)->get(),
         'taxes' => Tax::where('restaurant_id', $restaurant_id)->where('Active', true)->get(),
         'outlets' => Outlet::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'bar-outlets' => Outlet::where('restaurant_id', $restaurant_id)->where('type', 'bar')->get(),
         'restaurant-outlets' => Outlet::where('restaurant_id', $restaurant_id)->get(),
+        'outlets' => Outlet::where('restaurant_id', $restaurant_id)->get(),
+        'menu-categories' => MenuCategory::where('outlet_id', $outlet_id)->get(),
         'kitchen-outlets' => Outlet::where('restaurant_id', $restaurant_id)->where('type', 'kitchen')->get(),
         'kitchen-store-items' => StoreItem::where('store_id', $restaurant->store->id)
             ->where('item_category_id', 1)
@@ -147,6 +153,8 @@ function getModelList($model)
         'asset-locations' => AssetLocation::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'assets' => Asset::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'asset-categories' => AssetCategory::whereIn('restaurant_id', [1, $restaurant_id])->orderBy('name')->get(),
+        'genders' => ['Female' => 'female', 'Male' => 'male'],
+        'delivery-areas' => DeliveryArea::where('state_id', $restaurant->state_id)->orderBy('name')->get(),
 
         default => null,
     };
@@ -180,7 +188,7 @@ function calculateTaxAmount($amount)
 {
     //get all active tax and then apply to the amount 
     // Fetch all active taxes from the database
-    $activeTaxes = Tax::where('restaurant_id', restaurantId())->where('Active', true)->get();
+    $activeTaxes = Tax::where('restaurant_id', restaurantId())->where('is_active', true)->get();
 
     $totalTaxAmount = 0;
 
@@ -197,7 +205,7 @@ function calculateTaxAmount($amount)
 }
 function getAppliedTaxes($amount)
 {
-    $activeTaxes = Tax::where('restaurant_id', restaurantId())->where('Active', true)->get();
+    $activeTaxes = Tax::where('restaurant_id', restaurantId())->where('is_active', true)->get();
 
     $taxes = [];
 
@@ -211,6 +219,7 @@ function getAppliedTaxes($amount)
 
     return $taxes;
 }
+
 function calculateTotalAmountWithTax($amount)
 {
     return calculateTaxAmount($amount) + $amount;
@@ -300,6 +309,11 @@ function restaurant()
         return auth()->user()->restaurant;
     }
     return auth()->user()->userAccount->restaurant;
+}
+
+function outlet()
+{
+    return auth()->user()->outlet;
 }
 
 function restaurants()

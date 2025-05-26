@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('menu_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('menu_category_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('outlet_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->decimal('price', 10, 2);
+            $table->boolean('is_available')->default(true);
+            $table->boolean('is_combo')->default(false);
             $table->timestamps();
         });
     }

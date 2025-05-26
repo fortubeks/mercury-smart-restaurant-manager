@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+            $table->string('first_name');
+            $table->string('last_name')->nullable();
+            $table->string('email')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('phone_code')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('other_phone')->nullable();
+            $table->date('birthday')->nullable();
+            $table->string('address')->nullable();
+            $table->string('state_id')->nullable();
+            $table->string('country_id')->nullable();
             $table->timestamps();
         });
     }

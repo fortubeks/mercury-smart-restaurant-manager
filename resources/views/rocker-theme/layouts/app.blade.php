@@ -12,6 +12,7 @@
     <link href="{{url('assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet" />
     <link href="{{url('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet" />
     <link href="{{url('assets/plugins/metismenu/css/metisMenu.min.css')}}" rel="stylesheet" />
+    <link rel="stylesheet" href="{{url('assets/plugins/notifications/css/lobibox.min.css')}}" />
     <!-- loader-->
     <link href="{{url('assets/css/pace.min.css')}}" rel="stylesheet" />
     <script src="{{url('assets/js/pace.min.js')}}"></script>
@@ -69,6 +70,30 @@
                     <ul>
                         <li> <a href="{{ route('orders.index') }}"><i class='bx bx-radio-circle'></i>View Orders</a></li>
                         <li> <a href="{{ route('orders.create') }}"><i class='bx bx-radio-circle'></i>Create Order</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="has-arrow" href="javascript:;">
+                        <div class="parent-icon"> <i class="bx bx-user"></i>
+                        </div>
+                        <div class="menu-title">Menu</div>
+                    </a>
+                    <ul>
+                        <li> <a href="{{ route('menu-items.index') }}"><i class='bx bx-radio-circle'></i>Menu Items</a></li>
+                        <li> <a href="{{ route('menu-items.create') }}"><i class='bx bx-radio-circle'></i>Create Menu Item</a></li>
+                        <li> <a href="{{ route('menu-categories.index') }}"><i class='bx bx-radio-circle'></i>Menu Categories</a></li>
+                        <li> <a href="{{ route('menu-categories.create') }}"><i class='bx bx-radio-circle'></i>Create Menu Category</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="has-arrow" href="javascript:;">
+                        <div class="parent-icon"> <i class="bx bx-user"></i>
+                        </div>
+                        <div class="menu-title">Customers</div>
+                    </a>
+                    <ul>
+                        <li> <a href="{{ route('customers.index') }}"><i class='bx bx-radio-circle'></i>All Customers</a></li>
+                        <li> <a href="{{ route('customers.create') }}"><i class='bx bx-radio-circle'></i>Create Customer</a></li>
 
                     </ul>
                 </li>
@@ -167,7 +192,6 @@
                             </a>
                         </li>
 
-
                         <li>
                             <a href="{{ route('settings.index') }}" class="">
                                 <div class="parent-icon"><i class='bx bx-info-circle'></i></div>
@@ -184,7 +208,6 @@
                     </ul>
                 </li>
                 @endrole
-
 
                 <li>
                     <a href="https://wa.me/2348090839412" target="_blank">
@@ -231,6 +254,13 @@
                                 <ul class="dropdown-menu dropdown-menu-end">
 
                                 </ul>
+                            </li>
+                            <li class="nav-item mobile-search-icon d-flex d-none d-lg-block" style="margin-right: 200px;">
+                                <h4 class="form-control mt-2"> <span id="current-date"></span></h4>
+                            </li>
+                            <li class="nav-item mobile-search-icon d-flex"><span>Current Shift</span>
+                                <input id="current_shift" type="date" class="form-control datepicker flatpickr-input active"
+                                    name="current_shift" data-max-date="{{ now()->format('Y-m-d') }}" data-toggle="flatpickr" value="{{auth()->user()->current_shift ?? now()->format('Y-m-d')}}" placeholder="Shift">
                             </li>
                             <li class="nav-item dark-mode d-none d-sm-flex">
                                 <a class="nav-link dark-mode-icon" href="javascript:;"><i class='bx bx-moon'></i>
@@ -367,6 +397,7 @@
             </div>
         </header>
         <!--end header -->
+
         @yield('content')
         <!--start overlay-->
         <div class="overlay toggle-icon"></div>
@@ -401,12 +432,59 @@
     <script src="{{url('assets/plugins/vectormap/jquery-jvectormap-2.0.2.min.js')}}"></script>
     <script src="{{url('assets/plugins/vectormap/jquery-jvectormap-world-mill-en.js')}}"></script>
     <script src="{{url('assets/plugins/chartjs/js/chart.js')}}"></script>
-    <script src="{{url('assets/js/index.js')}}"></script>
+    <!-- <script src="{{url('assets/js/index.js')}}"></script> -->
     <!--app JS-->
     <script src="{{url('assets/js/app.js')}}"></script>
+
+    <!--notification js -->
+    <script src="{{url('assets/plugins/notifications/js/lobibox.min.js')}}"></script>
+    <script src="{{url('assets/plugins/notifications/js/notifications.min.js')}}"></script>
     <!-- <script>
         new PerfectScrollbar(".app-container")
     </script> -->
+    <script>
+        window.addEventListener('load', function() {
+            $('#outlet').change(function() {
+                // Get the selected value
+                var selectedOutletId = $(this).val();
+
+                // Send an AJAX GET request to update session value
+                $.ajax({
+                    url: "{{ url('set-outlet') }}",
+                    method: 'post',
+                    data: {
+                        outlet_id: selectedOutletId,
+                        _token: '{{ csrf_token() }}' // Add CSRF token for Laravel
+                    },
+                    success: function(response) {
+                        window.location.reload(); // Reload the page after successful update
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        // Handle errors if needed
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        // Disable scroll wheel
+        document.addEventListener('wheel', function(e) {
+            if (document.activeElement.type === 'number') {
+                document.activeElement.blur();
+            }
+        });
+
+        // Optional: disable arrow keys (up/down)
+        document.addEventListener('keydown', function(e) {
+            if (
+                document.activeElement.type === 'number' &&
+                (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+            ) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 
 </html>

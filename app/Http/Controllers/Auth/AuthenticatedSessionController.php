@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        $user->update(['last_login' => now()]);
+        if (!$user->current_shift) {
+            $user->update(['current_shift' => now()->format('Y-m-d')]);
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\BankAccountService;
 use Illuminate\Database\Eloquent\Model;
 
 class IncomingPayment extends Model
@@ -17,7 +18,8 @@ class IncomingPayment extends Model
             if ($payment->bank_account_id) {
                 $bankAccount = BankAccount::find($payment->bank_account_id);
                 if ($bankAccount) {
-                    $bankAccount->credit($payment);
+                    $bankAccountService = new BankAccountService();
+                    $bankAccountService->credit($payment);
                 }
             }
         });

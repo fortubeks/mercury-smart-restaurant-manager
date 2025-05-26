@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Customers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
+    Route::get('search/customers', [\App\Http\Controllers\CustomerController::class, 'search'])->name('search.customers');
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);
     //Menu
@@ -36,6 +37,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('menu-categories', \App\Http\Controllers\MenuCategoryController::class);
     //Menu Items
     Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class);
+    //search menu items
+    Route::get('search/menu-items', [\App\Http\Controllers\MenuItemController::class, 'search'])->name('search.menu-items');
+    //Cart routes
+    Route::post('cart/add', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
+    Route::post('cart/update', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
+    Route::post('cart/remove', [\App\Http\Controllers\CartController::class, 'remove'])->name('cart.remove');
+    Route::post('cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
+    Route::get('cart/edit', [\App\Http\Controllers\CartController::class, 'edit'])->name('cart.edit');
+    Route::post('cart/delete', [\App\Http\Controllers\CartController::class, 'delete'])->name('cart.delete');
+    //Printer
+    Route::get('printer/cart/{id}', [\App\Http\Controllers\PrinterController::class, 'printCart'])->name('printer.cart');
+    Route::get('printer/order/{order}', [\App\Http\Controllers\PrinterController::class, 'printOrder'])->name('printer.order');
+    Route::get('printer/kitchen-slip/{id}', [\App\Http\Controllers\PrinterController::class, 'printKitchenSlip'])->name('printer.kitchen-slip');
     //Stores
     Route::resource('stores', \App\Http\Controllers\StoreController::class);
     //Store Item Categories
@@ -56,6 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('users', \App\Http\Controllers\UserController::class);
     //Settings
     Route::resource('settings', \App\Http\Controllers\AppSettingController::class);
+
+    Route::post('set-outlet', [\App\Http\Controllers\OutletController::class, 'setOutlet'])->name('set.outlet');
 });
 Route::get('setting/restaurant/edit', [RestaurantController::class, 'editRestaurant'])->name('settings.restaurant.edit');
 Route::post('restaurant/update', [RestaurantController::class, 'updateRestaurant'])->name('restaurant.update');

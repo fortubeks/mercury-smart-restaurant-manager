@@ -19,19 +19,19 @@ var Lobibox = Lobibox || {};
 (function () {
 
     var LobiboxNotify = function (type, options) {
-//------------------------------------------------------------------------------
-//----------------PROTOTYPE VARIABLES-------------------------------------------
-//------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        //----------------PROTOTYPE VARIABLES-------------------------------------------
+        //------------------------------------------------------------------------------
         this.$type = null;
         this.$options = null;
         this.$el = null;
-//------------------------------------------------------------------------------
-//-----------------PRIVATE VARIABLES--------------------------------------------
-//------------------------------------------------------------------------------        
+        //------------------------------------------------------------------------------
+        //-----------------PRIVATE VARIABLES--------------------------------------------
+        //------------------------------------------------------------------------------        
         var me = this;
-//------------------------------------------------------------------------------
-//-----------------PRIVATE FUNCTIONS--------------------------------------------
-//------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        //-----------------PRIVATE FUNCTIONS--------------------------------------------
+        //------------------------------------------------------------------------------
         var _processInput = function (options) {
 
             if (options.size === 'mini' || options.size === 'large') {
@@ -106,7 +106,7 @@ var Lobibox = Lobibox || {};
         };
         var _createNotifyWrapper = function () {
             var selector = (me.$options.size === 'large' ? '.lobibox-notify-wrapper-large' : '.lobibox-notify-wrapper')
-                    + "." + me.$options.position.replace(/\s/gi, '.'),
+                + "." + me.$options.position.replace(/\s/gi, '.'),
                 $wrapper;
 
             //var classes = me.$options.position.split(" ");
@@ -243,9 +243,9 @@ var Lobibox = Lobibox || {};
             width = Math.min($(window).outerWidth(), width);
             return width;
         };
-//------------------------------------------------------------------------------
-//----------------PROTOTYPE FUNCTIONS-------------------------------------------
-//------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        //----------------PROTOTYPE FUNCTIONS-------------------------------------------
+        //------------------------------------------------------------------------------
         /**
          * Delete the notification
          *
@@ -324,9 +324,9 @@ var Lobibox = Lobibox || {};
             });
             me.$el.data('lobibox', me);
         };
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------
         this.$type = type;
         this.$options = _processInput(options);
         if (!me.$options.showAfterPrevious || Lobibox.notify.list.length === 0) {
@@ -354,7 +354,7 @@ var Lobibox = Lobibox || {};
         title: true,                // Title of notification. If you do not include the title in options it will automatically takes its value 
         //from Lobibox.notify.OPTIONS object depending of the type of the notifications or set custom string. Set this false to disable title
         size: 'normal',             // normal, mini, large
-        soundPath: 'sounds/',   // The folder path where sounds are located
+        soundPath: 'assets/plugins/notifications/js/sounds/',   // The folder path where sounds are located
         soundExt: '.ogg',           // Default extension for all sounds
         showClass: 'fadeInDown',    // Show animation class.
         hideClass: 'zoomOut',       // Hide animation class.

@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('menu_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('outlet_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->integer('position')->default(0);
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

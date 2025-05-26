@@ -74,16 +74,9 @@ class User extends Authenticatable
                         'name' => 'Main Restaurant',
                     ]);
 
-                    // Create an outlet under the restaurant
-                    $outlet = Outlet::create([
-                        'restaurant_id' => $restaurant->id,
-                        'name' => 'Main Outlet',
-                    ]);
-
                     // Update the user with the new relationships
                     $user->update([
                         'restaurant_id' => $restaurant->id,
-                        'outlet_id' => $outlet->id,
                     ]);
                 });
             }
