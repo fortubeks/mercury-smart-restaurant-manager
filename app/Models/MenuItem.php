@@ -67,6 +67,11 @@ class MenuItem extends Model
         return $this->belongsTo(Menu::class);
     }
 
+    public function menuCategory()
+    {
+        return $this->belongsTo(MenuCategory::class);
+    }
+
     // Items that make up this combo
     // Usage: $combo = MenuItem::find(10);
     // foreach ($combo->items as $item) {

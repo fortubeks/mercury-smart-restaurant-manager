@@ -45,6 +45,10 @@ class MenuItemController extends Controller
             $requestData['is_available'] = $request->has('is_available') ? 1 : 0;
             $requestData['is_combo'] = $request->has('is_combo') ? 1 : 0;
 
+            $categoryId = $request->menu_category_id ?? MenuCategory::where('outlet_id', $request->outlet_id)->where('is_default', true)->value('id');
+
+            $request->merge(['menu_category_id' => $categoryId]);
+
             $item = MenuItem::create(array_merge($request->all(), $requestData));
 
             //sync the outletStoreItem with the restaurant_item
@@ -96,7 +100,10 @@ class MenuItemController extends Controller
 
     public function edit($id)
     {
-        // Show the form for editing the specified resource.
+        $menuItem = MenuItem::findOrFail($id);
+        $outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
+        $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
+        return theme_view('menu-items.form')->with(['menuItems' => $menuItems, 'outletStoreItems' => $outletStoreItems, 'menuItem' => $menuItem]);
     }
 
     public function update(Request $request, $id)

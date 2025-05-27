@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class PrinterController extends Controller
@@ -41,11 +42,10 @@ class PrinterController extends Controller
         return theme_view('printers.print-cart')->with(compact('orderDetails', 'customerName', 'tableName'));
     }
 
-    public function printOrder(Order $order)
+    public function printOrder($id)
     {
-        // Load related menu items and payments
-        // Format print layout
-        // Route to appropriate printer
+        $order = Order::with(['customer', 'menuItems'])->findOrFail($id);
+        return theme_view('orders.print-bill')->with(compact('order'));
     }
 
     public function printKitchenSlip($orderCartId)

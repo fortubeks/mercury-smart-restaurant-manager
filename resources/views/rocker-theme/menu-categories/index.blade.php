@@ -10,7 +10,7 @@
             <div class="card-body">
                 <div class="d-lg-flex align-items-center mb-4 gap-3">
                     <div class="position-relative">
-                        Menu Items in <span class="text-primary">{{ $currentOutlet->name }}</span>
+                        Menu Categories in <span class="text-primary">{{ $currentOutlet->name }}</span>
                         <select id="outlet" class="form-select" data-outlet="{{ $currentOutlet->id }}">
                             @foreach (getModelList('outlets') as $outlet)
                             <option value="{{ $outlet->id }}" {{ ($currentOutlet->id == $outlet->id) ? 'selected' : '' }}>
@@ -19,46 +19,35 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="ms-auto"><a href="{{ route('menu-items.create') }}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Add New Item</a></div>
+                    <div class="ms-auto"><a href="{{ route('menu-categories.create') }}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Add New Category</a></div>
                 </div>
                 <div class="table-responsive">
                     <table id="items-table" class="table">
                         <thead class="table-light">
                             <tr>
-                                <th>Item Name</th>
-                                <th>Category</th>
-                                <th>Image</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
+                                <th>Name</th>
+                                <th>Items</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        @if ($menuItems->count())
+                        @if ($menuCategories->count())
                         <tbody>
-                            @foreach ($menuItems as $item)
+                            @foreach ($menuCategories as $category)
                             <tr>
-                                <td>{{ $item->name }}</td>
+                                <td>{{ $category->name }}</td>
                                 <td>
-                                    @if($item->menuCategory)
-                                    {{ $item->menuCategory->name }}
+                                    @if($category->menuItems->count())
+                                    <span class="badge bg-success">{{ $category->menuItems->count() }}</span>
                                     @else
-                                    <span class="badge bg-danger">No Category</span>
+                                    <span class="badge bg-danger">No Items</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if($item->image)
-                                    <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $item->image) }}" alt=" Image">
-                                    @else
-                                    <img style="width: 40px;" class="img-fluid user-photo" src="{{ url('/assets/images/menu-item-placeholder.png') }}" alt="Image">
-                                    @endif
-                                <td>₦{{ number_format($item->price) }}</td>
-                                <td>{{ $item->quantity }}</td>
-                                <td>
                                     <div class="d-flex order-actions">
-                                        <a href="{{ route('menu-items.edit', $item->id) }}">
+                                        <a href="{{ route('menu-categories.edit', $category->id) }}">
                                             <i class='bx bxs-edit'></i>
                                         </a>
-                                        <a class="ms-3" href="{{ route('menu-items.show', $item->id) }}">
+                                        <a class="ms-3" href="{{ route('menu-categories.show', $category->id) }}">
                                             <i class='bx bx-show'></i>
                                         </a>
                                     </div>

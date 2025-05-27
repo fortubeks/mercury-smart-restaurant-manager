@@ -31,7 +31,7 @@
                         <h6>Created By: {{$order->createdBy->name}}</h6>
                     </div>
                     <div class="ms-auto">
-                        <a href="{{url('order/print/'.$order->id)}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="lni lni-printer"></i>Print Order</a>
+                        <a href="{{route('printer.order',$order->id)}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="lni lni-printer"></i>Print Order</a>
                         @role('Manager')
                         <a href="javascript:void(0);" data-resource-id="{{$order->id}}" data-resource-url="{{url('orders')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal" class="btn btn-danger radius-30 mt-2 mt-lg-0 delete-resource"><i class="lni lni-trash"></i>Delete Order</a>
                         @endrole

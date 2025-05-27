@@ -109,13 +109,13 @@
                                                 <div class="input-group-text">
                                                     <label>
                                                         <input class="form-check-input" type="checkbox" name="combo_items[{{ $comboItem->id }}][checked]"
-                                                            {{ $menuItem->components->contains($comboItem->id) ? 'checked' : '' }}>
+                                                            {{ isset($menuItem) && $menuItem->components->contains($comboItem->id) ? 'checked' : '' }}>
                                                         {{ $comboItem->name }}
                                                     </label>
                                                 </div>
                                                 <input type="number" name="combo_items[{{ $comboItem->id }}][quantity]"
                                                     step="0.01" placeholder="Qty used" class="ml-2 w-24 form-control"
-                                                    value="{{ $menuItem->components->find($comboItem->id)?->pivot->quantity }}">
+                                                    value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->quantity }}">
                                             </div>
                                             @endforeach
                                         </div>

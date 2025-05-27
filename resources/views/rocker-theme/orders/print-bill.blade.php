@@ -115,28 +115,28 @@
 
         <div id="receipt-data">
             <div class="centered">
-                <img src="{{ asset('storage/'. hotel()->logo) }}" height="42" width="50" style="margin:10px 0;filter: brightness(1);">
+                <img src="{{ asset('storage/'. restaurant()->logo) }}" height="42" width="50" style="margin:10px 0;filter: brightness(1);">
 
-                <h2>{{__(hotel()->name)}}</h2>
+                <h2>{{__(restaurant()->name)}}</h2>
 
-                <p>{{__('Address')}}: {{__(hotel()->address)}}
-                    <br>{{__('Phone Number')}}: {{__(hotel()->phone)}}
+                <p>{{__('Address')}}: {{__(restaurant()->address)}}
+                    <br>{{__('Phone Number')}}: {{__(restaurant()->phone)}}
                 </p>
             </div>
-            <p>{{__('Date')}}: {{$restaurant_order->created_at->format("d-M-Y h:i:s A")}}<br>
-                {{ __('Customer') }}: {{ $restaurant_order->guest ? $restaurant_order->guest->name() : __('Walk-in Guest') }}<br>
+            <p>{{__('Date')}}: {{$order->created_at->format("d-M-Y h:i:s A")}}<br>
+                {{ __('Customer') }}: {{ $order->customer ? $order->customer->name() : __('Walk-in Customer') }}<br>
                 {{__('Table')}}:<br>
-                {{__('Order ID')}}: #{{$restaurant_order->id}}<br>
+                {{__('Order Ref')}}: #{{$order->reference}}<br>
             </p>
 
             <div class="centered">
                 <table class="table table-data">
                     <tbody>
-                        @foreach($restaurant_order->items as $item)
+                        @foreach($order->menuItems as $menuItem)
                         <tr>
-                            <td style="text-align:left" colspan="">{{__($item->restaurantItem->name)}}</td>
-                            <td>{{$item->qty}}</td>
-                            <td style="text-align:right;vertical-align:bottom">{{formatCurrency((float)$item->amount, 2, '.', '')}}</td>
+                            <td style="text-align:left" colspan="">{{__($menuItem->name)}}</td>
+                            <td>{{$menuItem->pivot->qty}}</td>
+                            <td style="text-align:right;vertical-align:bottom">{{formatCurrency((float)$menuItem->pivot->amount, 2, '.', '')}}</td>
                         </tr>
                         @endforeach
 
@@ -144,25 +144,25 @@
                             <td colspan="2"></td>
                             <td></td>
                         </tr>
-                        @if(hotel()->appSetting->include_tax == true)
+                        @if(restaurant()->appSetting->include_tax == true)
                         <tr>
                             <td colspan="2" style="text-align:left">{{ __('Taxes - inclusive') }}</td>
                             <td style="text-align:right">
-                                {{ number_format((float) calculateTaxAmount($restaurant_order->amount), 2, '.', ',') }}
+                                {{ number_format((float) calculateTaxAmount($order->amount), 2, '.', ',') }}
                             </td>
                         </tr>
                         <tr>
                             <td colspan="2" style="text-align:left">{{__('Grand Total')}}</td>
-                            <td style="text-align:right">{{formatCurrency(($restaurant_order->amount), 2, '.', ',')}}</td>
+                            <td style="text-align:right">{{formatCurrency(($order->amount), 2, '.', ',')}}</td>
                         </tr>
                         @else
                         <tr>
                             <td colspan="2" style="text-align:left">{{ __('Sub Total') }}</td>
                             <td style="text-align:right">
-                                {{ number_format($restaurant_order->amount, 2, '.', ',') }}
+                                {{ number_format($order->amount, 2, '.', ',') }}
                             </td>
                         </tr>
-                        @foreach(getAppliedTaxes($restaurant_order->amount) as $tax => $taxAmount)
+                        @foreach(getAppliedTaxes($order->amount) as $tax => $taxAmount)
                         <tr>
                             <td colspan="2" style="text-align:left">{{ __($tax) }}</td>
                             <td style="text-align:right">
@@ -172,14 +172,14 @@
                         @endforeach
                         <tr>
                             <td colspan="2" style="text-align:left">{{__('Grand Total')}}</td>
-                            <td style="text-align:right">{{formatCurrency((calculateTotalAmountWithTax($restaurant_order->amount)), 2, '.', ',')}}</td>
+                            <td style="text-align:right">{{formatCurrency((calculateTotalAmountWithTax($order->total_amount)), 2, '.', ',')}}</td>
                         </tr>
                         @endif
                         <tr>
                             <td colspan="2" style="text-align:left"></td>
                             <td style="text-align:right"></td>
                         </tr>
-                        @forelse ($restaurant_order->payments as $payment)
+                        @forelse ($order->payments as $payment)
                         <tr>
                             <td colspan="2" style="text-align:left">{{ __('Paid- ' . $payment->payment_method) }}</td>
                             <td style="text-align:right">{{ number_format($payment->amount, 2, '.', ',') }}</td>
@@ -192,7 +192,7 @@
                         @endforelse
 
                         <tr style="background-color:#ddd;">
-                            <td class="centered" colspan="3">{{__('Served By')}}: {{__($restaurant_order->user->name)}}</td>
+                            <td class="centered" colspan="3">{{__('Served By')}}: {{__($order->createdBy->name)}}</td>
                         </tr>
                         <tr>
                             <td class="centered" colspan="3">{{__('Thank you. Please come again')}}</td>

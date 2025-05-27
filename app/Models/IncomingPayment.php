@@ -31,7 +31,7 @@ class IncomingPayment extends Model
                 }
             }
             // Delete related wallet transaction
-            $payment->guestWalletTransaction()->delete();
+            $payment->customerWalletTransaction()->delete();
             //delete the bank account transaction
             $payment->transaction()->delete();
         });
@@ -52,13 +52,8 @@ class IncomingPayment extends Model
         return $this->belongsTo(BankAccount::class);
     }
 
-    public function guestWalletTransaction()
+    public function customerWalletTransaction()
     {
-        return $this->hasOne(GuestWalletTransaction::class);
-    }
-
-    public function companyWalletTransaction()
-    {
-        return $this->hasOne(CompanyWalletTransaction::class);
+        return $this->hasOne(CustomerWalletTransaction::class);
     }
 }

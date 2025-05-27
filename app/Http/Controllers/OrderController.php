@@ -194,14 +194,14 @@ class OrderController extends Controller
             'restaurant_order_id' => 'required'
         ]);
 
-        $restaurant_order = RestaurantOrder::findOrFail($request->restaurant_order_id);
+        $order = RestaurantOrder::findOrFail($request->restaurant_order_id);
         $wallet = null;
 
         if ($request->mode_of_payment == "wallet") {
-            $customer = $restaurant_order->customer;
+            $customer = $order->customer;
             $payer = $customer;
 
-            $wallet = getPayerWallet($payer, $restaurant_order);
+            $wallet = getPayerWallet($payer, $order);
         }
 
         //check if mode of payment is wallet, if wallet, check if wallet is well funded, return back with error if not
@@ -209,25 +209,25 @@ class OrderController extends Controller
             return back()->with('error', 'Insufficient balance to deduct from.');
         }
 
-        if ($request->amount > $restaurant_order->amountDue()) {
+        if ($request->amount > $order->amountDue()) {
             return back()->withErrors([
                 'error' => 'Amount to pay is greater than credit. Please try again.',
             ]);
         }
         DB::beginTransaction();
         try {
-            $payable_type = get_class($restaurant_order);
-            $payable_id = $restaurant_order->id;
+            $payable_type = get_class($order);
+            $payable_id = $order->id;
 
             //if it is different day settlement, add under settlement table
             //else delete credit sale and add normal payment
             if ($request->has('settlement')) {
                 $settlement = new Settlement();
-                $settlement->payable_id = $restaurant_order->id;
-                $settlement->payable_type = get_class($restaurant_order);
+                $settlement->payable_id = $order->id;
+                $settlement->payable_type = get_class($order);
                 $settlement->restaurant_id = restaurantId();
-                $settlement->customer_id = $restaurant_order->customer_id;
-                $settlement->company_id = $restaurant_order->company_id;
+                $settlement->customer_id = $order->customer_id;
+                $settlement->company_id = $order->company_id;
                 $settlement->amount = $request->amount;
                 $settlement->shift_date = $request->date_of_payment;
 
@@ -236,7 +236,7 @@ class OrderController extends Controller
                 $payable_type = Settlement::class;
                 $payable_id = $settlement->id;
             } else {
-                eraseCreditPayment($restaurant_order);
+                eraseCreditPayment($order);
             }
             $payment_controller = new PaymentController();
             $payment_controller->addPayment(
@@ -245,7 +245,7 @@ class OrderController extends Controller
                 $payable_id,
                 $request->amount,
                 $wallet,
-                $restaurant_order->restaurant_id,
+                $order->restaurant_id,
                 'Restaurant Order Payment'
             );
 
@@ -266,72 +266,66 @@ class OrderController extends Controller
 
 
 
-    public function destroy(RestaurantOrder $restaurant_order)
+    public function destroy(Order $order)
     {
         //authorize
-        $this->authorize('delete', $restaurant_order);
-        //we have to delete the payments made on this order
-        //for each payment on the order, if the payment is wallet or credit add the amount back to the customer wallet balance 
-        //then delete the payment, then the wallet transaction will be deleted automatically
-        $daily_sales_record = DailySale::where('restaurant_id', restaurantId())->where('shift_date', $restaurant_order->order_date)->first();
+        //$this->authorize('delete', $order);
+        $daily_sales_record = DailySale::where('restaurant_id', restaurantId())->where('shift_date', $order->order_date)->first();
         if ($daily_sales_record) {
             return back()->with('error', 'Delete failed. Audit has already been done.');
         }
         DB::beginTransaction();
         try {
-            foreach ($restaurant_order->payments as $payment) {
+            foreach ($order->payments as $payment) {
                 if ($payment->payment_method == 'wallet') {
-                    $customer_wallet = $restaurant_order->customer->customerWallet;
+                    $customer_wallet = $order->customer->customerWallet;
                     $customer_wallet->balance += $payment->amount;
                     $customer_wallet->save();
                 }
 
                 $payment->delete();
             }
-            foreach ($restaurant_order->settlements as $settlement) {
+            foreach ($order->settlements as $settlement) {
                 if ($settlement->payment_method == 'wallet') {
-                    $customer_wallet = $restaurant_order->customer->customerWallet;
+                    $customer_wallet = $order->customer->customerWallet;
                     $customer_wallet->balance += $payment->amount;
                     $customer_wallet->save();
                     customerWalletTransaction::create([
                         'customer_wallet_id' => $customer_wallet->id,
                         'amount' => $payment->amount,
                         'transaction_type' => 'credit',
-                        'description' => 'Refund from deleting order on ' . $restaurant_order->order_date,
+                        'description' => 'Refund from deleting order on ' . $order->order_date,
                     ]);
                 }
                 $settlement->delete();
             }
-            if (restaurant()->appSetting->restaurant_manage_stock == true) {
-                foreach ($restaurant_order->items as $item) {
-                    $menuItem = $item->restaurantItem;
-
-                    if (!$menuItem) continue;
+            if (restaurant()->appSetting->manage_stock == true) {
+                foreach ($order->menuItems as $menuItem) {
 
                     if ($menuItem->is_combo == 1) {
                         // Combo item: restore inventory for each component
                         foreach ($menuItem->components as $component) {
                             $outlet_store_item = $component->outletStoreItem;
                             if ($outlet_store_item) {
-                                $outlet_store_item->qty += $item->quantity * $component->pivot->quantity_used;
+                                $outlet_store_item->qty += $menuItem->pivot->qty * $component->pivot->quantity_used;
                                 $outlet_store_item->save();
                             }
                         }
                     } elseif ($menuItem->outletStoreItems && $menuItem->outletStoreItems->isNotEmpty()) {
                         // Regular item with multiple linked ingredients (via pivot)
                         foreach ($menuItem->outletStoreItems as $outletStoreItem) {
-                            $outletStoreItem->qty += $item->quantity * $outletStoreItem->pivot->quantity_used;
+                            $outletStoreItem->qty += $menuItem->pivot->qty * $outletStoreItem->pivot->quantity_used;
                             $outletStoreItem->save();
                         }
                     } elseif ($menuItem->outletStoreItem) {
                         // Regular item directly linked to one outlet store item
                         $outlet_store_item = $menuItem->outletStoreItem;
-                        $outlet_store_item->qty += $item->quantity;
+                        $outlet_store_item->qty += $menuItem->pivot->qty;
                         $outlet_store_item->save();
                     }
                 }
             }
-            $restaurant_order->delete();
+            $order->delete();
             DB::commit();
         } catch (\Exception $e) {
             logger()->error($e);
@@ -344,6 +338,6 @@ class OrderController extends Controller
             ]);
         }
 
-        return redirect('restaurant-orders')->with('success', 'Deleted successfully');
+        return redirect('orders')->with('success', 'Deleted successfully');
     }
 }

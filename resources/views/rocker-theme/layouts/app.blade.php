@@ -12,6 +12,10 @@
     <link href="{{url('assets/plugins/simplebar/css/simplebar.css')}}" rel="stylesheet" />
     <link href="{{url('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css')}}" rel="stylesheet" />
     <link href="{{url('assets/plugins/metismenu/css/metisMenu.min.css')}}" rel="stylesheet" />
+    <link href="{{url('assets/plugins/datatable/css/dataTables.bootstrap5.min.css')}}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link rel="stylesheet" href="{{url('assets/plugins/notifications/css/lobibox.min.css')}}" />
     <!-- loader-->
     <link href="{{url('assets/css/pace.min.css')}}" rel="stylesheet" />
@@ -436,14 +440,114 @@
     <!--app JS-->
     <script src="{{url('assets/js/app.js')}}"></script>
 
+    <script src="{{url('assets/plugins/datatable/js/jquery.dataTables.min.js')}}"></script>
+    <script src="{{url('assets/plugins/datatable/js/dataTables.bootstrap5.min.js')}}"></script>
+
+
     <!--notification js -->
     <script src="{{url('assets/plugins/notifications/js/lobibox.min.js')}}"></script>
     <script src="{{url('assets/plugins/notifications/js/notifications.min.js')}}"></script>
     <!-- <script>
         new PerfectScrollbar(".app-container")
     </script> -->
+    <script src="{{url('assets/js/helper.js')}}"></script>
+
     <script>
         window.addEventListener('load', function() {
+            $(".dropdown-toggle").dropdown();
+            $('input').click(function() {
+                this.select();
+            });
+
+            $(".money").each(function() {
+                let value = $(this).text().trim(); // Get the text inside the td
+                if ($.isNumeric(value)) { // Check if it's a number
+                    let formattedValue = new Intl.NumberFormat('en-NG', {
+                        style: 'currency',
+                        currency: 'NGN'
+                    }).format(value);
+                    $(this).text(formattedValue); // Set the formatted value back
+                }
+            });
+
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{url('assets/plugins/select2/js/select2-custom.js')}}"></script>
+
+    <script>
+        $(".datepicker").flatpickr();
+
+        $(".time-picker").flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "Y-m-d H:i",
+        });
+
+        $(".date-time").flatpickr({
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+
+        $(".date-format").flatpickr({
+            altInput: true,
+            altFormat: "F j, Y",
+            dateFormat: "Y-m-d",
+        });
+
+        $(".date-range").flatpickr({
+            mode: "range",
+            altInput: true,
+            altFormat: "F j, Y",
+            dateFormat: "Y-m-d",
+        });
+
+        $(".date-inline").flatpickr({
+            inline: true,
+            altInput: true,
+            altFormat: "F j, Y",
+            dateFormat: "Y-m-d",
+        });
+        $('#current_shift').change(function() {
+            // Get the selected date value
+            var selectedDate = $(this).val();
+
+            // Send a POST request to the controller
+            $.ajax({
+                url: "{{ url('set-current-shift') }}",
+                method: 'POST',
+                data: {
+                    shift_date: selectedDate,
+                    _token: '{{ csrf_token() }}' // Add CSRF token for Laravel
+                },
+                success: function(response) {
+                    // Reload the current page
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    // Handle errors if needed
+                }
+            });
+        });
+        setInterval(function() {
+            var currentDate = new Date();
+            var options = {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: true
+            };
+            var formattedDate = currentDate.toLocaleString('en-NG', options);
+            $('#current-date').text(formattedDate);
+        }, 1000); // Update every second
+        window.addEventListener('load', function() {
+
             $('#outlet').change(function() {
                 // Get the selected value
                 var selectedOutletId = $(this).val();

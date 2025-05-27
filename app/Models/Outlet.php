@@ -17,6 +17,12 @@ class Outlet extends Model
             if (auth()->check()) {
                 auth()->user()->update(['outlet_id' => $outlet->id]);
             }
+
+            MenuCategory::create([
+                'outlet_id' => $outlet->id,
+                'name' => 'Default',
+                'is_default' => true,
+            ]);
         });
     }
 }

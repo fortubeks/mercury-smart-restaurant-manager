@@ -70,7 +70,7 @@
                     <div class="chip">Wallet: {{formatCurrency($sales['wallet'])}}</div>
                     <div class="chip">Total: {{formatCurrency($sales['total'])}}</div>
                 </div>
-                <small>Click on the order number to view order details</small>
+                <small>Click on the order reference to view order details</small>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -78,7 +78,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Time</th>
-                                <th>Order No</th>
+                                <th>Ref</th>
                                 <th>Guest</th>
                                 <th>Items</th>
                                 <th>Status</th>
@@ -92,7 +92,7 @@
                             <tr>
                                 <td>{{$order->created_at->format('g:iA')}}</td>
                                 <td>
-                                    <a href="{{route('orders.show',$order->id)}}">{{$order->id}}</a>
+                                    <a href="{{route('orders.show',$order->id)}}"><small>{{$order->reference}}</small></a>
                                 </td>
                                 <td>
                                     @if ($order->customer)
@@ -117,7 +117,7 @@
                                 <td>
                                     <div class="d-flex order-actions">
                                         <a href="{{route('orders.show',$order->id)}}" class=""><i class="bx bxs-show"></i></a>
-                                        <a class="ms-3" href="{{url('order/print/'.$order->id)}}" class=""><i class="bx bxs-printer"></i></a>
+                                        <a class="ms-3" href="{{route('printer.order',$order->id)}}" class=""><i class="bx bxs-printer"></i></a>
                                         @role('Manager')
                                         <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$order->id}}" data-resource-url="{{url('orders')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
                                         @endrole
