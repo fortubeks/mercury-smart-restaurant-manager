@@ -73,25 +73,9 @@
         </div>
     </div>
 </div>
-</div>
-@include('rocker-theme.customers.partials.delete-modal')
 
 <script>
     window.addEventListener('load', function() {
-        $('#search-menuCategory').focus();
-        $('#search-menuCategory').on('input', function() {
-            var search = $(this).val();
-            $.ajax({
-                url: "{{ route('search.customers') }}",
-                method: 'GET',
-                data: {
-                    search: search
-                },
-                success: function(response) {
-                    $('#customers-table tbody').html(response);
-                }
-            });
-        });
 
     });
 </script>

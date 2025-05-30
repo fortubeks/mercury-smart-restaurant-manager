@@ -29,4 +29,8 @@ class Customer extends Model
         return $this->belongsToMany(Customer::class, 'customer_relations', 'customer_id', 'related_customer_id')
             ->withPivot('relationship_type');
     }
+    public function orders()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }

@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CountrySeeder::class,
             StateSeeder::class,
-            DeliveryAreaSeeder::class
+            DeliveryAreaSeeder::class,
+            ModuleSeeder::class
         ]);
     }
 }

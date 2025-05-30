@@ -630,9 +630,9 @@ a {
 }
 
 .order-actions a {
-	font-size: 18px;
-	width: 34px;
-	height: 34px;
+	font-size: 15px;
+	width: 30px;
+	height: 30px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -2710,4 +2710,18 @@ input::placeholder {
 	.chat-top-header-menu {
 		display: none
 	}
+}
+
+.store_item-image {
+	width: 40px;
+	height: auto;
+}
+
+.remove-button {
+	font-size: 24px;
+	color: red
+}
+
+.table {
+	font-size: 110%;
 }

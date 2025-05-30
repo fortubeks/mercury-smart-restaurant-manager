@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->boolean('is_default')->default(false);
+            $table->boolean('is_sales_outlet')->default(false);
             $table->timestamps();
         });
     }

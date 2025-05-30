@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('menu_item_id')->constrained()->onDelete('cascade');
 
             $table->decimal('qty', 10, 2); // Specify precision
-            $table->decimal('amount', 10, 2); // price * qty before tax/discount
+            $table->decimal('sub_total', 10, 2); // price * qty before tax/discount
 
             $table->decimal('tax_rate', 5, 2)->default(0); // percentage e.g. 7.5
             $table->decimal('tax_amount', 10, 2)->default(0);

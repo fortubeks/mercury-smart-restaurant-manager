@@ -64,14 +64,14 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(GuestUpdateRequest $request, Customer $guest)
+    public function update(CustomerUpdateRequest $request, Customer $customer)
     {
         if ($request->hasFile('id_picture_location')) {
             $idPictureLocation = $request->file('id_picture_location');
 
             // Delete old image if it exists
-            if ($guest->id_picture_location) {
-                Storage::disk('public')->delete($guest->id_picture_location);
+            if ($customer->id_picture_location) {
+                Storage::disk('public')->delete($customer->id_picture_location);
             }
 
             // Optimize the new image before storing it
@@ -81,7 +81,7 @@ class CustomerController extends Controller
             $newImageName = time() . '_' . $idPictureLocation->getClientOriginalName();
 
             // Store the new image in the correct directory
-            $imagePath = $idPictureLocation->storeAs('hotel/guest-id-images', $newImageName, 'public');
+            $imagePath = $idPictureLocation->storeAs('hotel/customer-id-images', $newImageName, 'public');
 
             // Instead of merging, store the new image path separately
             $updateData = $request->except('id_picture_location'); // Get other request data
@@ -89,45 +89,30 @@ class CustomerController extends Controller
         } else {
             $updateData = $request->all(); // If no image, update normally
         }
-        // Update the guest record
-        $guest->update($updateData);
+        // Update the customer record
+        $customer->update($updateData);
 
-        return redirect()->route('customers.show', $guest)->with('success_message', 'Customer Updated Successfully');
+        return redirect()->route('customers.show', $customer)->with('success_message', 'Customer Updated Successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Customer $guest)
+    public function destroy(Customer $customer)
     {
-        if ($guest->roomReservations()->exists()) {
-            return back()->with('error', 'Customer cannot be deleted because they are linked to reservations.');
+        if ($customer->orders()->exists()) {
+            return back()->with('error', 'Customer cannot be deleted because they are linked to orders.');
         }
-        if ($guest->invoices()->exists()) {
-            return back()->with('error', 'Customer cannot be deleted because they are linked to reservations.');
-        }
-        if ($guest->barOrders()->exists()) {
-            return back()->with('error', 'Customer cannot be deleted because they are linked to reservations.');
-        }
-        if ($guest->restaurantOrders()->exists()) {
-            return back()->with('error', 'Customer cannot be deleted because they are linked to reservations.');
-        }
-        $guest->delete();
+
+        $customer->delete();
         return redirect()->route('customers.index')->with('success_message', 'Customer Deleted Successfully');
     }
 
-    public function restore(string $id)
-    {
-        $guest = Customer::withTrashed()->findOrFail($id);
-        $guest->restore();
-        return redirect()->route('customers.index')->with('success', 'Customer restored successfully.');
-    }
-
-    public function getGuestInfo(Request $request)
+    public function getCustomerInfo(Request $request)
     {
         $id = $request->id;
-        $guest = Customer::find($id);
-        return json_encode($guest);
+        $customer = Customer::find($id);
+        return json_encode($customer);
     }
 
     public function search(Request $request)
@@ -156,46 +141,46 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function guestTransactions(Customer $guest)
+    public function customerTransactions(Customer $customer)
     {
-        $transactions = $guest->getGuestTransactions();
+        $transactions = $customer->getCustomerTransactions();
         return theme_view('customers.transactions', [
             'transactions' => $transactions,
-            'guest' => $guest
+            'customer' => $customer
         ]);
     }
 
-    public function getGuestUnsettledTransactions(Customer $guest)
+    public function getCustomerUnsettledTransactions(Customer $customer)
     {
-        $transactions = $guest->getGuestUnsettledTransactions();
+        $transactions = $customer->getCustomerUnsettledTransactions();
         return theme_view('customers.unsettled-transactions', [
             'transactions' => $transactions,
-            'guest' => $guest
+            'customer' => $customer
         ]);
     }
 
-    public function getGuestTransactions(Customer $guest)
+    public function getCustomerTransactions(Customer $customer)
     {
-        $guest->load([
+        $customer->load([
             'invoices',
             'restaurantOrders',
             'barOrders',
             'laundrySales',
-            'guestWallet.guestWalletTransactions'
+            'customerWallet.customerWalletTransactions'
         ]);
 
-        $guest_wallet_transactions = $guest->guestWallet ? $guest->guestWallet->guestWalletTransactions : collect();
+        $customer_wallet_transactions = $customer->customerWallet ? $customer->customerWallet->customerWalletTransactions : collect();
 
         $transactions = collect()
-            ->merge($guest->invoices)
-            ->merge($guest->restaurantOrders)
-            ->merge($guest->barOrders)
-            ->merge($guest->laundrySales)
-            ->merge($guest_wallet_transactions);
+            ->merge($customer->invoices)
+            ->merge($customer->restaurantOrders)
+            ->merge($customer->barOrders)
+            ->merge($customer->laundrySales)
+            ->merge($customer_wallet_transactions);
 
         $sortedTransactions = $transactions->sortBy('created_at')->values()->map(function ($transaction) {
             return [
-                'transaction_date' => $transaction instanceof App\Models\GuestWalletTransaction ? $transaction->transaction_date : $transaction->created_at->format('Y-m-d'),
+                'transaction_date' => $transaction instanceof App\Models\CustomerWalletTransaction ? $transaction->transaction_date : $transaction->created_at->format('Y-m-d'),
                 'model_type' => class_basename($transaction),
                 'id' => $transaction->id,
                 'reservation_id' => $transaction->reservation->id ?? null,

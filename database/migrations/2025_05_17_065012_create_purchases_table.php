@@ -13,6 +13,19 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+            $table->foreignId('store_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('purchase_category_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->date('purchase_date');
+            $table->string('status')->default('pending');
+            $table->string('payment_status')->default('pending');
+            $table->decimal('sub_total', 12, 2);
+            $table->decimal('tax_amount', 12, 2)->default(0);
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('total_amount', 12, 2);
+            $table->string('note')->nullable();
+            $table->string('uploaded_file')->nullable();
             $table->timestamps();
         });
     }

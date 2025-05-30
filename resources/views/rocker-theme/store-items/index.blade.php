@@ -1,0 +1,92 @@
+@extends('rocker-theme.layouts.app')
+<!--start page wrapper -->
+<div class="page-wrapper">
+    <div class="page-content">
+        <!--breadcrumb-->
+
+        <!--end breadcrumb-->
+
+        <div class="ms-auto">
+
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-lg-flex align-items-center mb-4 gap-3">
+
+                    <div class="position-relative">
+                        <h6>
+                            Store Items
+                        </h6>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{url('/store/export-items')}}">Export Store Items</a>
+                        <a href="{{ url('store/give-items?type=food') }}" class="btn btn-sm btn-dark"><i class="bx bx-restaurant mr-2"></i>Give Out Items</a>
+                        <a href="{{ route('store-items.create') }}" class="btn btn-sm btn-dark"><i class="bx bx-plus-circle mr-2"></i>Add New Item</a>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="store-items-data-table" class="table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Stock Balance</th>
+                                <th>Unit</th>
+                                <th>For Sale</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($storeItems as $storeItem)
+                            <tr>
+                                <td>{{ $storeItem->code }}</td>
+                                <td>
+                                    @if($storeItem->image)
+                                    <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $store_item->image) }}" alt=" Image">
+                                    @endif
+                                </td>
+                                <td>{{ $storeItem->name }}</td>
+                                <td>{{ $storeItem->category() }}</td>
+                                <td style="color: {{ $storeItem->qty <= $storeItem->low_stock_alert ? 'red' : 'black' }}">
+                                    {{ $storeItem->qty }}
+                                </td>
+                                <td>{{ $storeItem->unit_measurement }}</td>
+                                <td>{{ $storeItem->for_sale ? 'Yes' : 'No' }}</td>
+                                <td>
+                                    <div class="d-flex order-actions">
+                                        <a href="{{ route('store-items.edit', $storeItem) }}" class="ms-3">
+                                            <i class='bx bxs-edit'></i>
+                                        </a>
+                                        <a href="{{ route('store-items.show', $storeItem) }}" class="ms-3">
+                                            <i class='bx bxs-show'></i>
+                                        </a>
+                                        <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$storeItem->id}}" data-resource-url="{{url('store-items')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            @empty
+                            <h6>No Store Items. <a href="{{ url('store-item/import') }}">Import Now</a></h6>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @include('rocker-theme.layouts.partials.delete-modal')
+</div>
+
+<script>
+    window.addEventListener('load', function() {
+
+        var store_items_table = $('#store-items-data-table').DataTable({
+            lengthChange: false,
+        });
+        store_items_table.buttons().container().appendTo('#store-items-data-table_wrapper .col-md-6:eq(0)');
+
+    });
+</script>

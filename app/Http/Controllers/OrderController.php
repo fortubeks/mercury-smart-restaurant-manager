@@ -144,7 +144,7 @@ class OrderController extends Controller
 
             // Create the order
             $order = Order::create($orderData);
-            $order->update(['amount' => $sub_total]);
+            $order->update(['sub_total' => $sub_total]);
 
             // Retrieve the items from the cart order
             $items = $cart[$orderCartId]['items'];

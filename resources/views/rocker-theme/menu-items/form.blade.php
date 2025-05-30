@@ -80,7 +80,7 @@
                                 </div>
                                 <div class="form-group mt-3">
                                     <details class="mb-3">
-                                        <summary class="cursor-pointer font-semibold text-blue-600">Select Ingredients (Store Items):</summary>
+                                        <summary class="cursor-pointer font-semibold text-blue-600">Select Ingredients (Store Items in current Outlet):</summary>
                                         <div id="store-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
                                             @foreach ($outletStoreItems as $item)
                                             <div class="input-group mb-3">
@@ -102,7 +102,7 @@
 
                                 <div class="form-group mt-3">
                                     <details class="mb-3">
-                                        <summary class="cursor-pointer font-semibold text-blue-600">Select Combo Items (Restaurant Items):</summary>
+                                        <summary class="cursor-pointer font-semibold text-blue-600">Select Combo Items (Menu Items):</summary>
                                         <div id="combo-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
                                             @foreach ($menuItems as $comboItem)
                                             <div class="input-group mb-3">
@@ -162,25 +162,9 @@
         </div>
     </div>
 </div>
-</div>
-@include('rocker-theme.customers.partials.delete-modal')
 
 <script>
     window.addEventListener('load', function() {
-        $('#search-menuItem').focus();
-        $('#search-menuItem').on('input', function() {
-            var search = $(this).val();
-            $.ajax({
-                url: "{{ route('search.customers') }}",
-                method: 'GET',
-                data: {
-                    search: search
-                },
-                success: function(response) {
-                    $('#customers-table tbody').html(response);
-                }
-            });
-        });
 
     });
 </script>

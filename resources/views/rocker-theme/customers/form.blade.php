@@ -103,7 +103,7 @@
     </div>
 </div>
 </div>
-@include('rocker-theme.customers.partials.delete-modal')
+@include('rocker-theme.layouts.partials.delete-modal')
 
 <script>
     window.addEventListener('load', function() {

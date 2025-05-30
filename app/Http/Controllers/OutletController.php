@@ -21,4 +21,27 @@ class OutletController extends Controller
         $request->user()->update(['outlet_id' => $outletId]);
         return response()->json(['message' => 'Session updated successfully']);
     }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'is_sales_outlet' => 'boolean',
+        ]);
+
+        $data['restaurant_id'] = $request->user()->restaurant_id;
+
+        \DB::transaction(function () use (&$outlet, $data) {
+            $outlet = Outlet::create($data);
+            if ($outlet->is_sales_outlet) {
+                MenuCategory::create([
+                    'outlet_id' => $outlet->id,
+                    'name' => 'Default',
+                    'is_default' => true,
+                ]);
+            }
+        });
+
+        return redirect()->route('outlets.index')->with('success', 'Outlet created successfully');
+    }
 }

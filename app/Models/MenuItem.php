@@ -102,7 +102,7 @@ class MenuItem extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class, 'menu_item_order')
+        return $this->belongsToMany(Order::class, 'menu_item_orders')
             ->withPivot(['qty', 'amount', 'tax_rate', 'tax_amount', 'discount_rate', 'discount_amount', 'total_amount'])
             ->withTimestamps();
     }

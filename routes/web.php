@@ -52,26 +52,77 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('printer/kitchen-slip/{id}', [\App\Http\Controllers\PrinterController::class, 'printKitchenSlip'])->name('printer.kitchen-slip');
     //Stores
     Route::resource('stores', \App\Http\Controllers\StoreController::class);
+    Route::get('store/dashboard', [\App\Http\Controllers\StoreController::class, 'dashboard'])->name('store.dashboard');
     //Store Item Categories
     Route::resource('store-item-categories', \App\Http\Controllers\StoreItemCategoryController::class);
     //Store Items
     Route::resource('store-items', \App\Http\Controllers\StoreItemController::class);
+
+    Route::get('store-item/import', [\App\Http\Controllers\StoreItemController::class, 'viewImportItemsForm']);
+
+    Route::get('store-item/import/download-sample', [\App\Http\Controllers\StoreItemController::class, 'downloadSampleExcel'])->name('store-item.import.download-sample');
+    Route::post('store-item/import/new', [\App\Http\Controllers\StoreItemController::class, 'importItems'])->name('store-item.import.new');
+
+    Route::post('store-item/import/existing', [\App\Http\Controllers\StoreItemController::class, 'importItemsByUpdate'])->name('store-item.import.existing');
+
+    Route::get('store-item/download-existing', [\App\Http\Controllers\StoreItemController::class, 'export'])->name('store-item.download-existing');
+
+    Route::get('store/give-items', [\App\Http\Controllers\StoreItemController::class, 'viewGiveItemsForm'])->name('store.give-items');
+    Route::post('store/give-items', [\App\Http\Controllers\StoreItemController::class, 'giveItems'])->name('store.give-items.post');
+
+    Route::get('migrate-items', [\App\Http\Controllers\StoreItemController::class, 'viewMigrateItemsForm']);
+    Route::post('migrate-items', [\App\Http\Controllers\StoreItemController::class, 'migrateItems']);
+
+    Route::get('incoming-inventories', [\App\Http\Controllers\StoreInventoryController::class, 'incomingItems'])->name('incoming-inventories');
+    Route::get('outgoing-inventories', [\App\Http\Controllers\StoreInventoryController::class, 'outgoingItems'])->name('outgoing-inventories');
+
+    Route::get('stock-count', [\App\Http\Controllers\StoreInventoryController::class, 'viewStockCountPage']);
+    Route::post('stock-count', [\App\Http\Controllers\StoreInventoryController::class, 'getStockCount']);
+
+    Route::get('export-items', [\App\Http\Controllers\StoreItemController::class, 'export']);
+
+    Route::post('store-item-activity/delete/{id}', [\App\Http\Controllers\StoreInventoryController::class, 'deleteStoreActivity']);
+
+    Route::post('store/report-damaged-item', [\App\Http\Controllers\StoreItemController::class, 'reportDamagedItem'])->name('store.reportdamaged');
     //Expense Categories
     Route::resource('expense-categories', \App\Http\Controllers\ExpenseCategoryController::class);
     //Expense Items
     Route::resource('expense-items', \App\Http\Controllers\ExpenseItemController::class);
+    //Outgoing Payments
+    Route::resource('outgoing-payments', \App\Http\Controllers\OutgoingPaymentController::class);
+    Route::get('outgoing-payments/search', [\App\Http\Controllers\OutgoingPaymentController::class, 'search'])->name('outgoing-payments.search');
+    Route::post('outgoing-payment/purchase', [\App\Http\Controllers\OutgoingPaymentController::class, 'storePurchasePayment'])->name('outgoing-payments.purchase.store');
     //Expenses
     Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
+    Route::get('expense/all', [\App\Http\Controllers\ExpenseController::class, 'allExpenses'])->name('expenses.all');
+    Route::get('expense/summary', [\App\Http\Controllers\ExpenseController::class, 'summary'])->name('expenses.summary');
+    Route::get('expense/search', [\App\Http\Controllers\ExpenseController::class, 'search'])->name('expense.search');
     //Purchases
     Route::resource('purchases', \App\Http\Controllers\PurchaseController::class);
+    Route::get('purchase/all', [\App\Http\Controllers\PurchaseController::class, 'allExpenses'])->name('purchases.all');
+    Route::get('purchase/summary', [\App\Http\Controllers\PurchaseController::class, 'summary'])->name('purchases.summary');
+    Route::get('purchase/search', [\App\Http\Controllers\PurchaseController::class, 'search'])->name('purchases.search');
     //Suppliers
     Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);
     //Users
     Route::resource('users', \App\Http\Controllers\UserController::class);
     //Settings
     Route::resource('settings', \App\Http\Controllers\AppSettingController::class);
+    Route::get('setting/app', [\App\Http\Controllers\AppSettingController::class, 'showAppSettingsForm'])->name('settings.app.settings');
+    Route::post('setting/app', [\App\Http\Controllers\AppSettingController::class, 'updateAppSettings'])->name('settings.app.settings.post');
+
+    Route::get('setting/bulk-sms', [\App\Http\Controllers\BulkMessageController::class, 'showSettingsForm'])->name('settings.bulk-sms');
+    Route::post('setting/bulk-sms', [\App\Http\Controllers\BulkMessageController::class, 'updateSettings'])->name('settings.bulk-sms.post');
+    //Booking Engine
+    Route::get('setting/booking-engine', [\App\Http\Controllers\AppSettingController::class, 'showBookingEngineSettingsForm'])->name('settings.booking-engine');
+    Route::post('setting/booking-engine', [\App\Http\Controllers\AppSettingController::class, 'updateBookingEngineSettings'])->name('settings.booking-engine.post');
+    //Taxes
+    Route::resource('taxes', \App\Http\Controllers\TaxController::class);
 
     Route::post('set-outlet', [\App\Http\Controllers\OutletController::class, 'setOutlet'])->name('set.outlet');
+
+    //set shift
+    Route::post('shift/set', [\App\Http\Controllers\UserController::class, 'setShift'])->name('shift.set');
 });
 Route::get('setting/restaurant/edit', [RestaurantController::class, 'editRestaurant'])->name('settings.restaurant.edit');
 Route::post('restaurant/update', [RestaurantController::class, 'updateRestaurant'])->name('restaurant.update');

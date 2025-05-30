@@ -22,7 +22,7 @@
                     <div class="ms-auto"><a href="{{ route('menu-items.create') }}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>Add New Item</a></div>
                 </div>
                 <div class="table-responsive">
-                    <table id="items-table" class="table">
+                    <table id="items-data-table" class="table">
                         <thead class="table-light">
                             <tr>
                                 <th>Item Name</th>
@@ -35,32 +35,33 @@
                         </thead>
                         @if ($menuItems->count())
                         <tbody>
-                            @foreach ($menuItems as $item)
+                            @foreach ($menuItems as $menuItem)
                             <tr>
-                                <td>{{ $item->name }}</td>
+                                <td>{{ $menuItem->name }}</td>
                                 <td>
-                                    @if($item->menuCategory)
-                                    {{ $item->menuCategory->name }}
+                                    @if($menuItem->menuCategory)
+                                    {{ $menuItem->menuCategory->name }}
                                     @else
                                     <span class="badge bg-danger">No Category</span>
                                     @endif
                                 </td>
                                 <td>
-                                    @if($item->image)
-                                    <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $item->image) }}" alt=" Image">
+                                    @if($menuItem->image)
+                                    <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $menuItem->image) }}" alt=" Image">
                                     @else
-                                    <img style="width: 40px;" class="img-fluid user-photo" src="{{ url('/assets/images/menu-item-placeholder.png') }}" alt="Image">
                                     @endif
-                                <td>₦{{ number_format($item->price) }}</td>
-                                <td>{{ $item->quantity }}</td>
+                                <td>₦{{ number_format($menuItem->price) }}</td>
+                                <td>{{ $menuItem->quantity }}</td>
                                 <td>
                                     <div class="d-flex order-actions">
-                                        <a href="{{ route('menu-items.edit', $item->id) }}">
+                                        <a href="{{ route('menu-items.edit', $menuItem->id) }}">
                                             <i class='bx bxs-edit'></i>
                                         </a>
-                                        <a class="ms-3" href="{{ route('menu-items.show', $item->id) }}">
+                                        <a class="ms-3" href="{{ route('menu-items.show', $menuItem->id) }}">
                                             <i class='bx bx-show'></i>
                                         </a>
+                                        <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$menuItem->id}}" data-resource-url="{{url('menu-items')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
+
                                     </div>
                                 </td>
                             </tr>
@@ -80,13 +81,13 @@
             </div>
         </div>
     </div>
+    @include('rocker-theme.layouts.partials.delete-modal')
 </div>
 <script>
     window.addEventListener('load', function() {
 
         var items_table = $('#items-data-table').DataTable({
             lengthChange: true,
-            buttons: ['excel', 'pdf', 'print']
         });
         items_table.buttons().container().appendTo('#items-data-table_wrapper .col-md-6:eq(0)');
     });

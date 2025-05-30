@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('outgoing_payments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('payable_id');
+            $table->string('payable_type');
+            $table->foreignId('bank_account_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
+            $table->decimal('amount', 15, 2);
+            $table->string('payment_method')->nullable();
+            $table->text('note')->nullable();
+            $table->date('date_of_payment');
             $table->timestamps();
         });
     }

@@ -60,34 +60,6 @@ class User extends Authenticatable
         ];
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::created(function ($user) {
-            // Only proceed if the user is a super admin
-            if ($user->is_super_admin) {
-                DB::transaction(function () use ($user) {
-                    // Create a restaurant for the super admin
-                    $restaurant = Restaurant::create([
-                        'user_id' => $user->id,
-                        'name' => 'Main Restaurant',
-                    ]);
-
-                    // Update the user with the new relationships
-                    $user->update([
-                        'restaurant_id' => $restaurant->id,
-                    ]);
-                });
-            }
-
-            // Assign roles if any
-            if (method_exists($user, 'getRoleIds') && $user->getRoleIds()) {
-                $user->roles()->sync($user->getRoleIds());
-            }
-        });
-    }
-
     public function getIsSuperAdminAttribute()
     {
         return optional($this->role)->name === Role::SUPER_ADMIN;

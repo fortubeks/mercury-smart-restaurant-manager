@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\RestaurantSetupService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +56,23 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->input('password')),
                 'phone' => $request->input('phone'),
             ]);
+
+            if ($user->is_super_admin) {
+                // No need for another transaction here
+                $restaurant = (new RestaurantSetupService)->createWithDefaults([
+                    'user_id' => $user->id,
+                    'name' => 'Main Restaurant',
+                ]);
+
+                $user->update([
+                    'restaurant_id' => $restaurant->id,
+                ]);
+            }
+
+            // Assign roles if any
+            if (method_exists($user, 'getRoleIds') && $user->getRoleIds()) {
+                $user->roles()->sync($user->getRoleIds());
+            }
 
             event(new Registered($user));
 

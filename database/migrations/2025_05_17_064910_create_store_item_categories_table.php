@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('store_item_categories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('store_id')->constrained()->onDelete('cascade');
+            $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->boolean('is_default')->default(false);
             $table->foreignId('parent_id')->nullable();
             $table->foreign('parent_id')->references('id')->on('store_item_categories')->nullOnDelete();
             $table->timestamps();

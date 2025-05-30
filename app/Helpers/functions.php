@@ -19,6 +19,7 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemSubCategory;
 use App\Models\MenuCategory;
+use App\Models\Module;
 use App\Models\Outlet;
 use App\Models\Purchase;
 use App\Models\PurchaseCategory;
@@ -28,6 +29,7 @@ use App\Models\Room;
 use App\Models\RoomCategory;
 use App\Models\RoomReservation;
 use App\Models\StoreItem;
+use App\Models\StoreItemCategory;
 use App\Models\Supplier;
 use App\Models\Tax;
 use App\Models\User;
@@ -108,6 +110,25 @@ function formatCurrency($amount)
 {
     return "₦" . number_format($amount, 2);
 }
+
+function getStatusOptions()
+{
+    return [
+        'RECEIVED' => 'Received',
+        'PARTIAL' => 'Partial',
+        'ORDERED' => 'Ordered',
+        'PENDING' => 'Pending',
+    ];
+}
+
+function getActiveOptions()
+{
+    return [
+        'in-active' => 'In Active',
+        'active' => 'Active',
+    ];
+}
+
 function getModelList($model)
 {
     $user = auth()->user();
@@ -122,10 +143,10 @@ function getModelList($model)
         'suppliers' => Supplier::where('restaurant_id', $restaurant_id)->get(),
         'purchases' => Purchase::where('store_id', $restaurant->store->id)->get(),
         'expense-items' => ExpenseItem::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
-        'store-items' => StoreItem::where('store_id', $restaurant->store->id)->orderBy('name')->get(),
+        'store-items' => StoreItem::where('store_id', $restaurant->defaultStore->id)->orderBy('name')->get(),
         'room-categories' => RoomCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
-        'item-categories' => ItemCategory::all(),
-        'item-sub_categories' => ItemSubCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
+        'purchase-categories' => PurchaseCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
+        'store-item-categories' => StoreItemCategory::where('restaurant_id', $restaurant->id)->orderBy('name')->get(),
         'rooms' => Room::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'venues' => Venue::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'customers' => Customer::where('restaurant_id', $restaurant_id)->orderBy('first_name')->get(),
@@ -155,6 +176,8 @@ function getModelList($model)
         'asset-categories' => AssetCategory::whereIn('restaurant_id', [1, $restaurant_id])->orderBy('name')->get(),
         'genders' => ['Female' => 'female', 'Male' => 'male'],
         'delivery-areas' => DeliveryArea::where('state_id', $restaurant->state_id)->orderBy('name')->get(),
+        'unit-measurements' => ['Kilogram (Kg)' => 'kg', 'Pieces (pcs)' => 'pcs'],
+        'modules' => Module::all(),
 
         default => null,
     };

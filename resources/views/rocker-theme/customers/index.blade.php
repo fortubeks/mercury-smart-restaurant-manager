@@ -40,9 +40,9 @@
                                             <i class='bx bx-show'></i>
                                         </a>
                                         <a href="{{ route('customers.edit', $customer->id) }}" class="me-3">
-                                            <i class='bx bx-pen'></i>
+                                            <i class='bx bxs-edit'></i>
                                         </a>
-                                        <a class="ms-3 delete-customer" href="javascript:void(0);" data-customer-id="{{$customer->id}}" data-bs-toggle="modal" data-bs-target="#deleteCustomerModal"><i class="bx bxs-trash"></i></a>
+                                        <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$customer->id}}" data-resource-url="{{url('customers')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
                                     </div>
                                 </td>
 
@@ -67,7 +67,7 @@
         </div>
     </div>
 </div>
-@include('rocker-theme.customers.partials.delete-modal')
+@include('rocker-theme.layouts.partials.delete-modal')
 
 <script>
     window.addEventListener('load', function() {

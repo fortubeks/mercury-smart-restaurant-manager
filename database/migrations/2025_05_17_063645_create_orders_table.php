@@ -22,13 +22,13 @@ return new class extends Migration
             $table->string('status')->default('settled'); //open,settled
             $table->string('payment_status')->default('pending');
             $table->string('reference')->unique()->nullable();
-            $table->decimal('amount');
+            $table->decimal('sub_total', 10, 2);
             $table->decimal('tax_rate')->default(0.00);
             $table->decimal('tax_amount')->default(0.00);
             $table->decimal('discount_rate')->default(0.00);
             $table->string('discount_type')->default('flat');
             $table->decimal('discount_amount')->default(0.00);
-            $table->decimal('total_amount');
+            $table->decimal('total_amount', 10, 2);
             $table->string('delivery_address')->nullable(); // Free-text address
             $table->text('notes')->nullable();
             $table->timestamps();

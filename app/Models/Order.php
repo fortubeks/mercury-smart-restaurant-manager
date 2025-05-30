@@ -11,7 +11,7 @@ class Order extends Model
         'created_by',
         'customer_id',
         'order_date',
-        'amount',
+        'sub_total',
         'mode_of_payment',
         'total_amount',
         'status',
@@ -57,7 +57,7 @@ class Order extends Model
     public function menuItems()
     {
         return $this->belongsToMany(MenuItem::class, 'menu_item_orders')
-            ->withPivot(['qty', 'amount', 'tax_rate', 'tax_amount', 'discount_rate', 'discount_amount', 'total_amount'])
+            ->withPivot(['qty', 'sub_total', 'tax_rate', 'tax_amount', 'discount_rate', 'discount_amount', 'total_amount'])
             ->withTimestamps();
     }
 

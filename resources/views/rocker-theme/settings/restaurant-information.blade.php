@@ -97,7 +97,7 @@
                                                 <option value="" disabled>Select State</option>
                                                 @foreach (getModelList('states') as $key => $state)
                                                 <option value="{{ $state->id }}"
-                                                    {{ $key == $restaurant->state_id ? 'selected' : '' }}>{{ $state->name }}
+                                                    {{ $state->id == $restaurant->state_id ? 'selected' : '' }}>{{ $state->name }}
                                                 </option>
                                                 @endforeach
                                             </select>

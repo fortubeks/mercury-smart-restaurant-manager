@@ -132,11 +132,8 @@
                         <div class="menu-title">Purchases</div>
                     </a>
                     <ul>
-                        <li> <a href="{{ route('purchases.index') }}"><i class='bx bx-radio-circle'></i>Dashboard</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('purchases.create') }}"><i class='bx bx-radio-circle'></i>Create</a>
-                        </li>
+                        <li> <a href="{{ route('purchases.index') }}"><i class='bx bx-radio-circle'></i>Dashboard</a></li>
+                        <li> <a href="{{ route('purchases.create') }}"><i class='bx bx-radio-circle'></i>Create</a></li>
                     </ul>
                 </li>
                 <li>
@@ -154,6 +151,8 @@
                         <div class="menu-title">Store</div>
                     </a>
                     <ul>
+                        <li> <a href="{{ route('store.dashboard') }}"><i class='bx bx-radio-circle'></i>Dashboard</a></li>
+                        <li> <a href="{{ route('store-items.index') }}"><i class='bx bx-radio-circle'></i>Store Items</a></li>
 
                         <!-- Add the "Inventories" dropdown -->
                         <li>
@@ -162,7 +161,6 @@
                                 <i class="bx bx-store"></i> Incoming & Outgoing
                             </a>
                             <ul>
-
                             </ul>
                         </li>
                     </ul>
@@ -401,7 +399,7 @@
             </div>
         </header>
         <!--end header -->
-
+        @include('rocker-theme.layouts.notifications.flash-messages')
         @yield('content')
         <!--start overlay-->
         <div class="overlay toggle-icon"></div>
@@ -516,7 +514,7 @@
 
             // Send a POST request to the controller
             $.ajax({
-                url: "{{ url('set-current-shift') }}",
+                url: "{{ url('shift/set') }}",
                 method: 'POST',
                 data: {
                     shift_date: selectedDate,

@@ -10,7 +10,7 @@ class MenuItemOrder extends Model
         'menu_item_id',
         'order_id',
         'qty',
-        'amount',
+        'sub_total',
         'tax_rate',
         'tax_amount',
         'discount_rate',

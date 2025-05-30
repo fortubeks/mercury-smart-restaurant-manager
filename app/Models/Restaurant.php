@@ -20,36 +20,6 @@ class Restaurant extends Model
         'restaurant_type'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::created(function ($restaurant) {
-            DB::transaction(function () use ($restaurant) {
-                // Create a corresponding app_settings record for the restaurant
-                AppSetting::create([
-                    'restaurant_id' => $restaurant->id,
-                    'manage_stock' => 0,
-                    'kitchen_store' => 0,
-                ]);
-
-                // Create a default outlet under the restaurant
-                Outlet::create([
-                    'restaurant_id' => $restaurant->id,
-                    'name' => 'Main Outlet',
-                ]);
-
-                //create default cash bank account for the restaurant
-                BankAccount::create([
-                    'restaurant_id' => $restaurant->id,
-                    'account_name' => 'Default Cash Account',
-                    'account_number' => '0000000000',
-                    'balance' => 0.00,
-                ]);
-            });
-        });
-    }
-
     public function getIsRestaurantProfileCompleteAttribute()
     {
         return $this->name && $this->address && $this->phone && $this->country_id && $this->state_id;
@@ -70,11 +40,32 @@ class Restaurant extends Model
         return $this->hasMany(BankAccount::class);
     }
 
+    public function modules()
+    {
+        return $this->belongsToMany(Module::class)->withTimestamps();
+    }
+
     public function defaultCashBankAccount()
     {
         //try to get the default cash bank account
         $bankAccount = $this->bankAccounts()->where('account_name', 'like', '%cash%')->where('account_number', '0000000000')->first();
 
         return $bankAccount;
+    }
+
+    public function defaultStore()
+    {
+        return $this->hasOne(Store::class);
+        //return $this->hasOne(Store::class)->where('is_default', true);
+    }
+
+    public function outlets()
+    {
+        return $this->hasMany(Outlet::class);
+    }
+
+    public function expenseCategories()
+    {
+        return $this->hasMany(ExpenseCategory::class);
     }
 }

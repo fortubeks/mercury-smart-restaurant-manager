@@ -80,7 +80,10 @@ class MenuCategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Logic to update a menu category
+        $request->validate(['name' => 'required']);
+        $menuCategory = MenuCategory::findOrFail($id);
+        $menuCategory->update($request->all());
+        return redirect('menu-categories')->with('success', 'Successfully updated');
     }
 
     /**
