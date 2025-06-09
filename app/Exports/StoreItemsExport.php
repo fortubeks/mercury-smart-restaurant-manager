@@ -10,11 +10,11 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 class StoreItemsExport implements FromCollection, WithHeadings
 {
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
-        return StoreItem::where('store_id', auth()->user()->hotel->store->id)->get();
+        return StoreItem::where('store_id', auth()->user()->userAccount->restaurant->defaultStore->id)->get();
     }
 
     /**

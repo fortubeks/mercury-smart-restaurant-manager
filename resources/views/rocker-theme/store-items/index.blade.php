@@ -19,9 +19,10 @@
                         </h6>
                     </div>
                     <div class="ms-auto">
-                        <a href="{{url('/store/export-items')}}">Export Store Items</a>
+                        <a href="{{route('store-item.download-existing')}}" class="btn btn-sm btn-dark"><i class="bx bx-download mr-2"></i>Import/Update Store Items</a>
+                        <a href="{{route('store-item.download-existing')}}" class="btn btn-sm btn-dark"><i class="bx bx-upload mr-2"></i>Export Store Items</a>
                         <a href="{{ url('store/give-items?type=food') }}" class="btn btn-sm btn-dark"><i class="bx bx-restaurant mr-2"></i>Give Out Items</a>
-                        <a href="{{ route('store-items.create') }}" class="btn btn-sm btn-dark"><i class="bx bx-plus-circle mr-2"></i>Add New Item</a>
+                        <a href="{{ route('store-items.create') }}" class="btn btn-sm btn-dark"><i class="bx bx-plus-circle"></i>Add New Item</a>
                     </div>
                 </div>
                 <div class="table-responsive">

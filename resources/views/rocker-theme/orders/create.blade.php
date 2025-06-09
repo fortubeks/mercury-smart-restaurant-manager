@@ -1,5 +1,4 @@
 @extends('rocker-theme.layouts.app')
-@include('rocker-theme.layouts.notifications.flash-messages')
 <style>
     .cart-item {
         display: flex;
@@ -51,13 +50,13 @@
 </style>
 <div class="page-wrapper">
     <div class="page-content">
-        <div class="row">
-            <div class="col-md-12 mb-4">
-                <a href="{{route('orders.index')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-chevron-left-circle"></i>Back to orders</a>
-            </div>
-            <div class="col-8 mx-auto">
-                <div class="card">
-                    <div class="card-body p-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-lg-flex align-items-center gap-3">
+                    <div class="me-3">
+                        <a href="{{route('orders.index')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-chevron-left-circle"></i>Back to orders</a>
+                    </div>
+                    <div style="width: 80%;">
                         <div class="row">
                             <div class="col">
                                 <input type="text" id="searchItems" class="form-control ps-5 radius-30" placeholder="Search Items">
@@ -72,6 +71,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 mx-auto">
                 <div class="card">
                     <div class="card-body">
                         <ul class="nav nav-tabs nav-primary" role="tablist">
@@ -85,40 +88,58 @@
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item d-none" role="presentation">
-                                <a class="nav-link" data-bs-toggle="tab" href="#primaryprofile" role="tab"
+                            @foreach ($menuCategories as $category)
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" href="#{{ $category->id }}" role="tab"
                                     aria-selected="false" tabindex="-1">
                                     <div class="d-flex align-items-center">
-                                        <div class="tab-icon"><i class="bx bx-user-pin font-18 me-1"></i>
+                                        <div class="tab-icon"><i class="bx bx-category font-18 me-1"></i>
                                         </div>
-                                        <div class="tab-title">Beer</div>
+                                        <div class="tab-title">{{ $category->name }}</div>
                                     </div>
                                 </a>
                             </li>
-                            <li class="nav-item d-none" role="presentation">
-                                <a class="nav-link" data-bs-toggle="tab" href="#primarycontact" role="tab"
-                                    aria-selected="false" tabindex="-1">
-                                    <div class="d-flex align-items-center">
-                                        <div class="tab-icon"><i class="bx bx-microphone font-18 me-1"></i>
-                                        </div>
-                                        <div class="tab-title">Others</div>
-                                    </div>
-                                </a>
-                            </li>
+                            @endforeach
                         </ul>
                         <div class="tab-content py-3">
                             <div class="tab-pane fade active show" id="items" role="tabpanel">
-                                @foreach ($menuItems as $item)
-                                <button type="button" class="btn btn-outline-primary btn-lg add-to-cart mx-2 mt-3"
-                                    data-item-id="{{ $item->id }}">{{ $item->name }}({{ $item->quantity }})</button>
-                                @endforeach
-                            </div>
-                            <div class="tab-pane fade" id="primaryprofile" role="tabpanel">
+                                <div class="d-flex flex-wrap gap-2 menu-items">
+                                    @foreach ($menuItems as $item)
+                                    <button type="button" class="btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center"
+                                        style="width: 100px; height: 120px;" data-item-id="{{ $item->id }}">
 
-                            </div>
-                            <div class="tab-pane fade" id="primarycontact" role="tabpanel">
+                                        @if ($item->image)
+                                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
+                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" class="mb-1">
+                                        @else
+                                        <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
+                                        @endif
 
+                                        <small class="text-wrap">{{ $item->name }} ({{ $item->quantity }})</small>
+                                    </button>
+                                    @endforeach
+                                </div>
                             </div>
+                            @foreach ($menuCategories as $category)
+                            <div class="tab-pane fade" id="{{ $category->id }}" role="tabpanel">
+                                <div class="d-flex flex-wrap gap-2 menu-items">
+                                    @foreach ($category->menuItems as $item)
+                                    <button type="button" class="btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center"
+                                        style="width: 100px; height: 120px;" data-item-id="{{ $item->id }}">
+
+                                        @if ($item->image)
+                                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
+                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" class="mb-1">
+                                        @else
+                                        <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
+                                        @endif
+
+                                        <small class="text-wrap">{{ $item->name }} ({{ $item->quantity }})</small>
+                                    </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -127,32 +148,34 @@
                 <div class="card">
                     <div class="card-body p-4">
                         @if(isset($cartData) && count($cartData['items']) > 0)
-                        @foreach ($cartData['items'] as $itemId => $item)
-                        <div class="cart-item" data-item-id="{{ $itemId }}">
-                            <div class="cart-item-dets">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="">{{ $item['name'] }} </p>
+                        <div class="cart-items">
+                            @foreach ($cartData['items'] as $itemId => $item)
+                            <div class="cart-item" data-item-id="{{ $itemId }}">
+                                <div class="cart-item-dets">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="">{{ $item['name'] }} </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p style="text-align: right;">₦{{ number_format($item['price'], 2) }} x <span class="quantity">{{ $item['quantity'] }}</span></p>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <p style="text-align: right;">₦{{ number_format($item['price'], 2) }} x <span class="quantity">{{ $item['quantity'] }}</span></p>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <input type="number" class="quantity-input form-control" value="{{ $item['quantity'] }}" min="1">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input type="text" class="price-input form-control" value="{{ $item['price'] }}">
-                                    </div>
-                                    <div class="col-md-4 d-flex order-actions">
-                                        <a href="javascript:;" class="ms-3 update-cart"><i class="bx bxs-edit"></i></a>
-                                        <a href="javascript:;" class="ms-3 remove-from-cart"><i class="bx bxs-trash"></i></a>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="number" class="quantity-input form-control" value="{{ $item['quantity'] }}" min="1">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="price-input form-control" value="{{ $item['price'] }}">
+                                        </div>
+                                        <div class="col-md-4 d-flex order-actions">
+                                            <a href="javascript:;" class="ms-3 update-cart"><i class="bx bxs-edit"></i></a>
+                                            <a href="javascript:;" class="ms-3 remove-from-cart"><i class="bx bxs-trash"></i></a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            @endforeach
                         </div>
-                        @endforeach
                         @else
                         <div class="cart-items">
                             <p>Your cart is empty.</p>
@@ -163,20 +186,18 @@
                     <div class="card-body p-4">
                         <div class="row mb-3">
                             <div class="col">
-                                <label for="single-select-field" class="form-label">Table</label>
-                                <select class="form-select selectpicker update-order-info table_id" id="single-select-field" data-table="">
+                                <label for="selected-table-id" class="form-label">Table</label>
+                                <select class="form-select selectpicker update-order-info" id="selected-table-id" data-table="">
                                     <option value="">--No Table--</option>
-
                                 </select>
                             </div>
                         </div>
                     </div>
 
-
                     <div class="cart-math">
                         <p class="cart-math-item">
                             <span class="cart-math-header">Total:</span>
-                            <span class="g-price total">₦{{ number_format(0) }}</span>
+                            <span class="g-price total">₦{{ $cartData['order_info']['total_amount'] ?? 0 }}</span>
                         </p>
                     </div>
                     @if(!$dailySalesRecord)
@@ -196,8 +217,8 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end m-3">
-                        <a href="{{ url('restaurant-order/print-cart/'. $orderCartId ) }}" class="btn btn-outline-primary btn-sm px-2 ms-3">Print Bill</a>
-                        <a href="{{ url('restaurant-order/print-docket/'. $orderCartId ) }}" class="btn btn-outline-primary btn-sm px-2 ms-3">Print Docket</a>
+                        <a href="{{ url('order/print-cart/'. $orderCartId ) }}" class="btn btn-outline-primary btn-sm px-2 ms-3">Print Bill</a>
+                        <a href="{{ url('order/print-docket/'. $orderCartId ) }}" class="btn btn-outline-primary btn-sm px-2 ms-3">Print Docket</a>
                         <button type="button" class="btn btn-sm btn-outline-danger px-2 ms-3 clear-cart">Clear</button>
                         <button type="button" class="btn btn-sm btn-outline-success px-2 ms-3" data-bs-toggle="modal" data-bs-target="#orderModal">Proceed </button>
                     </div>
@@ -212,7 +233,8 @@
 
 <script>
     var orderCartId = '{{ $orderCartId }}';
-
+</script>
+<script>
     window.addEventListener('load', function() {
         $("#wrapper").addClass('toggled');
         $('.orderCartId').val(orderCartId);
@@ -223,9 +245,10 @@
             $('#outlet').val(outletId);
         }
 
-        const itemsDiv = $('#items');
+        const itemsDiv = $('.menu-items');
         // Delegate the click event to a parent element (e.g., itemsDiv)
         itemsDiv.on('click', '.add-to-cart', function() {
+
             var itemId = $(this).data('item-id');
             $.ajax({
                 url: "{{ url('cart/add') }}",
@@ -244,28 +267,7 @@
                 }
             });
         });
-        $('.update-order-info').change(function() {
-            var selectedGuestId = $('.guest_id').val();
-            var selectedRoomId = $('#room_id').val();
-            // Send an AJAX post request to update session value
-            $.ajax({
-                url: "{{ url('update-order-info') }}",
-                method: 'post',
-                data: {
-                    selected_guest_id: selectedGuestId,
-                    selected_room_id: selectedRoomId,
-                    order_cart_id: orderCartId,
-                    _token: '{{ csrf_token() }}' // Add CSRF token for Laravel
-                },
-                success: function(response) {
-                    console.log(response);
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    // Handle errors if needed
-                }
-            });
-        });
+
         $('.clear-cart').click(function() {
             $.ajax({
                 url: "{{ url('cart/clear') }}",
@@ -397,16 +399,41 @@
                 success: function(data) {
                     //console.log(data);
                     // Update the items div with the filtered items
-                    const itemsDiv = $('#items');
+                    const itemsDiv = $('.menu-items');
                     itemsDiv.empty(); // Clear previous items
 
                     $.each(data, function(index, item) {
-                        const button = $('<button>').attr({
+                        const button = $('<button>', {
                             type: 'button',
-                            class: 'btn btn-outline-primary btn-lg add-to-cart mx-2 mt-3',
+                            class: 'btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center',
+                            style: 'width: 100px; height: 120px;',
                             'data-item-id': item.id
-                        }).text(item.name + '(' + item.quantity + ')');
+                        });
 
+                        // Image or placeholder
+                        if (item.image) {
+                            const img = $('<img>', {
+                                src: '/storage/' + item.image,
+                                alt: item.name,
+                                style: 'width: 50px; height: 50px; object-fit: cover; border-radius: 6px;',
+                                class: 'mb-1'
+                            });
+                            button.append(img);
+                        } else {
+                            const placeholder = $('<div>', {
+                                class: 'mb-1',
+                                style: 'width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;'
+                            });
+                            button.append(placeholder);
+                        }
+
+                        // Name and quantity
+                        const label = $('<small>', {
+                            class: 'text-wrap',
+                            text: item.name + ' (' + item.quantity + ')'
+                        });
+
+                        button.append(label);
                         itemsDiv.append(button);
                     });
                 },
@@ -459,7 +486,7 @@
         $('.cart-math').html(`
     <p class="cart-math-item">
       <span class="cart-math-header">Total:</span>
-      <span class="g-price total">${total}</span>
+      <span class="g-price total">${formatCurrency(total)}</span>
     </p>
   `);
         $('#amount-paid').val(total);

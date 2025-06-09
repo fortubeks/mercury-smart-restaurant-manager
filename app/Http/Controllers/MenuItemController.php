@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\OutletStoreItem;
+use App\Services\MenuItemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MenuItemController extends Controller
 {
+    public function __construct(protected MenuItemService $menuItemService) {}
+
     public function index()
     {
         $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
@@ -36,58 +39,9 @@ class MenuItemController extends Controller
             'is_available' => 'boolean',
         ]);
 
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('menu-items/images', 'public');
-                $requestData['image'] = $imagePath;
-            }
+        $item = $this->menuItemService->save($request);
 
-            $requestData['is_available'] = $request->has('is_available') ? 1 : 0;
-            $requestData['is_combo'] = $request->has('is_combo') ? 1 : 0;
-
-            $categoryId = $request->menu_category_id ?? MenuCategory::where('outlet_id', $request->outlet_id)->where('is_default', true)->value('id');
-
-            $request->merge(['menu_category_id' => $categoryId]);
-
-            $item = MenuItem::create(array_merge($request->all(), $requestData));
-
-            //sync the outletStoreItem with the restaurant_item
-            $data = $request->input('store_items', []);
-
-            $syncData = [];
-
-            foreach ($data as $outletStoreItemId => $values) {
-                if (isset($values['checked']) && isset($values['quantity_used'])) {
-                    $syncData[$outletStoreItemId] = [
-                        'quantity_used' => $values['quantity_used']
-                    ];
-                }
-            }
-
-            $item->outletStoreItems()->sync($syncData);
-            //end of sync
-
-            //sync combo items
-            $syncData = [];
-
-            if (request()->has('combo_items')) {
-                foreach (request('combo_items') as $componentId => $values) {
-                    if (isset($values['checked']) && $values['checked']) {
-                        $syncData[$componentId] = [
-                            'quantity' => $values['quantity'] ?? 1
-                        ];
-                    }
-                }
-            }
-
-            // Sync the combo components with quantity_used
-            $item->components()->sync($syncData);
-            //end of sync
-            DB::commit();
-        } catch (\Exception $e) {
-            logger($e->getMessage());
-            DB::rollBack();
+        if (!$item) {
             return redirect()->back()->with('error_message', 'Unable to create item');
         }
 
@@ -121,58 +75,9 @@ class MenuItemController extends Controller
 
         $menuItem = MenuItem::findOrFail($id);
 
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('menu-items/images', 'public');
-                $requestData['image'] = $imagePath;
-            }
+        $updated = $this->menuItemService->update($request, $menuItem);
 
-            $requestData['is_available'] = $request->has('is_available') ? 1 : 0;
-            $requestData['is_combo'] = $request->has('is_combo') ? 1 : 0;
-
-            $categoryId = $request->menu_category_id ?? MenuCategory::where('outlet_id', $request->outlet_id)->where('is_default', true)->value('id');
-
-            $request->merge(['menu_category_id' => $categoryId]);
-
-            $menuItem->update(array_merge($request->all(), $requestData));
-
-            //sync the outletStoreItem with the restaurant_item
-            $data = $request->input('store_items', []);
-
-            $syncData = [];
-
-            foreach ($data as $outletStoreItemId => $values) {
-                if (isset($values['checked']) && isset($values['quantity_used'])) {
-                    $syncData[$outletStoreItemId] = [
-                        'quantity_used' => $values['quantity_used']
-                    ];
-                }
-            }
-
-            $menuItem->outletStoreItems()->sync($syncData);
-            //end of sync
-
-            //sync combo items
-            $syncData = [];
-
-            if (request()->has('combo_items')) {
-                foreach (request('combo_items') as $componentId => $values) {
-                    if (isset($values['checked']) && $values['checked']) {
-                        $syncData[$componentId] = [
-                            'quantity' => $values['quantity'] ?? 1
-                        ];
-                    }
-                }
-            }
-
-            // Sync the combo components with quantity_used
-            $menuItem->components()->sync($syncData);
-            //end of sync
-            DB::commit();
-        } catch (\Exception $e) {
-            logger($e->getMessage());
-            DB::rollBack();
+        if (!$updated) {
             return redirect()->back()->with('error_message', 'Unable to update item');
         }
 
@@ -211,5 +116,55 @@ class MenuItemController extends Controller
             ->get();
 
         return response()->json($menuItems);
+    }
+
+    private function saveOrUpdateMenuItem(Request $request, MenuItem $item = null): MenuItem
+    {
+        $requestData = [];
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('menu-items/images', 'public');
+            $requestData['image'] = $imagePath;
+        }
+
+        $requestData['is_available'] = $request->has('is_available') ? 1 : 0;
+        $requestData['is_combo'] = $request->has('is_combo') ? 1 : 0;
+
+        $categoryId = $request->menu_category_id ?? MenuCategory::where('outlet_id', $request->outlet_id)
+            ->where('is_default', true)
+            ->value('id');
+        $request->merge(['menu_category_id' => $categoryId]);
+
+        if ($item) {
+            $item->update(array_merge($request->all(), $requestData));
+        } else {
+            $item = MenuItem::create(array_merge($request->all(), $requestData));
+        }
+
+        // Sync outlet store items
+        $storeItems = $request->input('store_items', []);
+        $syncData = [];
+        foreach ($storeItems as $outletStoreItemId => $values) {
+            if (isset($values['checked']) && isset($values['quantity_used'])) {
+                $syncData[$outletStoreItemId] = [
+                    'quantity_used' => $values['quantity_used']
+                ];
+            }
+        }
+        $item->outletStoreItems()->sync($syncData);
+
+        // Sync combo components
+        $comboItems = $request->input('combo_items', []);
+        $syncData = [];
+        foreach ($comboItems as $componentId => $values) {
+            if (isset($values['checked']) && $values['checked']) {
+                $syncData[$componentId] = [
+                    'quantity' => $values['quantity'] ?? 1
+                ];
+            }
+        }
+        $item->components()->sync($syncData);
+
+        return $item;
     }
 }

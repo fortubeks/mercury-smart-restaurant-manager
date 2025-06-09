@@ -1,0 +1,7 @@
+name,price,description,is_available
+Chicken,4000,,TRUE
+Bread,4000,,TRUE
+Beef,4000,,TRUE
+Yam,4000,,TRUE
+Salad,4000,,TRUE
+Indomie,4000,,FALSE

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailySale;
+use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
 
@@ -24,17 +25,18 @@ class CartController extends Controller
 
         // Cart exists, get the cart data for the order ID
         $cartData = $cart[$orderCartId];
-
+        //dd($cartData);
         $outletId = $user->outlet_id;
 
         //get the outlet items
         $menuItems = MenuItem::where('outlet_id', $outletId)->where('is_available', true)->orderBy('name', 'asc')->get();
+        $menuCategories = MenuCategory::with('menuItems')->where('outlet_id', $outletId)->orderBy('name', 'asc')->get();
 
         //check if there is a sales record for the selected date. so that if there is, hide the submit buttons
         $dailySalesRecord = DailySale::where('restaurant_id', restaurantId())->where('shift_date', $user->current_shift)->first();
 
         // Return the edit page view for the cart
-        return theme_view('orders.create')->with(compact('menuItems', 'outletId', 'orderCartId', 'dailySalesRecord', 'cartData'));
+        return theme_view('orders.create')->with(compact('menuItems', 'outletId', 'orderCartId', 'dailySalesRecord', 'cartData', 'menuCategories'));
     }
 
     public function add(Request $request)
@@ -247,5 +249,91 @@ class CartController extends Controller
             return redirect('orders')->with('success', 'Cart has been successfully deleted');
         }
         return redirect('orders')->with('error', 'Cart not found');
+    }
+
+    public function updateOrderInformation(Request $request)
+    {
+        $cartOrderId = $request->input('order_cart_id');
+
+        if (!$cartOrderId) {
+            return response()->json(['success' => false, 'message' => 'Order Cart ID is required'], 400);
+        }
+
+        $cart = session()->get('restaurant-order-cart', []);
+
+        // If order doesn't exist in session, initialize it
+        if (!array_key_exists($cartOrderId, $cart)) {
+            $cart[$cartOrderId] = [
+                'items' => [],
+                'order_info' => [
+                    'customer_id' => null,
+                    'customer_name' => null,
+                    'table_id' => null,
+                    'selected_delivery_area_id' => null,
+                    'delivery_address' => null,
+                    'delivery_notes' => null,
+                    'total_amount' => 0,
+                    'sub_total' => 0,
+                    'tax_amount' => 0,
+                ],
+            ];
+        }
+
+        // Update only the fields that are present in the request
+        $fieldsToUpdate = [
+            'customer_id' => $request->input('selected_customer_id'),
+            'customer_name' => $request->input('customer_name'),
+            'table_id' => $request->input('selected_table_id'),
+            'selected_delivery_area_id' => $request->input('selected_delivery_area_id'),
+            'delivery_address' => $request->input('delivery_address'),
+            'delivery_notes' => $request->input('delivery_notes'),
+        ];
+
+        foreach ($fieldsToUpdate as $key => $value) {
+            if (!is_null($value)) {
+                $cart[$cartOrderId]['order_info'][$key] = $value;
+            }
+        }
+
+        session()->put('restaurant-order-cart', $cart);
+
+        return response()->json([
+            'success' => true,
+            'cart' => $cart[$cartOrderId],
+        ]);
+    }
+
+    public function printCart($cartId)
+    {
+        $cart = session()->get('restaurant-order-cart', []);
+        //get the items and print them
+
+        // Check if the restaurant cart order ID exists in the session
+        if (!array_key_exists($cartId, $cart)) {
+            logger('Bar cart order not found in session');
+            return back();
+        }
+
+        $orderDetails = $cart[$cartId];
+
+        $guestName = 'Walk In Guest';
+
+        if (empty($orderDetails['order_info']['guest_id']) && !empty($orderDetails['order_info']['room_id'])) {
+            $room = Room::find($orderDetails['order_info']['room_id']);
+            if ($room) {
+                // Assuming you have a relationship like $room->currentGuest or a way to get current guest
+                $currentGuest = $room->currentGuest() ?? null; // You might need to implement this logic
+                $guestName = $currentGuest?->name() ?? 'Walk In Guest';
+            }
+        } elseif (!empty($orderDetails['order_info']['guest_id'])) {
+            $guest = Guest::find($orderDetails['order_info']['guest_id']);
+            $guestName = $guest?->name() ?? 'Unknown Guest';
+        }
+
+        $roomName = !empty($orderDetails['order_info']['room_id'])
+            ? optional(Room::find($orderDetails['order_info']['room_id']))->name ?? 'N/A'
+            : 'N/A';
+
+        return view('dashboard.printers.print-cart')->with(compact('orderDetails', 'guestName', 'roomName'));
     }
 }

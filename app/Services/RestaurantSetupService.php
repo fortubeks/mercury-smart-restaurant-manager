@@ -59,12 +59,15 @@ class RestaurantSetupService
                 'is_default' => true,
             ]);
 
-            // Create default expense categories
-            StoreItemCategory::create([
-                'restaurant_id' => $restaurant->id,
-                'name' => 'Default',
-                'is_default' => true,
-            ]);
+            // Create default store item categories
+            $defaultCategories = ['Food', 'Drinks', 'Ingredients', 'Packaging', 'Others'];
+            foreach ($defaultCategories as $name) {
+                StoreItemCategory::create([
+                    'restaurant_id' => $restaurant->id,
+                    'name' => $name,
+                    'is_default' => true,
+                ]);
+            }
 
             return $restaurant;
         });

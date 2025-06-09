@@ -1,3 +1,8 @@
+<style>
+    .customer-option {
+        cursor: pointer;
+    }
+</style>
 <!-- Modal -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -11,6 +16,7 @@
                     @csrf
                     <!-- Step 1: Search or Create Customer -->
                     <div id="step-customer">
+                        <p><b>{{ $cartData['order_info']['customer_name'] ?? '' }}</b></p>
                         <input type="text" id="customer-search" class="form-control" placeholder="Search customer by name or phone">
 
                         <div id="customer-results" class="mt-3"></div>
@@ -36,17 +42,20 @@
                             <select class="form-select" name="delivery_area_id" id="delivery-area" required>
                                 <option value="">--Select Area--</option>
                                 @foreach(getModelList('delivery-areas') as $area)
-                                <option value="{{ $area->id }}">{{ $area->name }}</option>
+                                <option value="{{ $area->id }}"
+                                    {{ (isset($cartData['order_info']['selected_delivery_area_id']) && $cartData['order_info']['selected_delivery_area_id'] == $area->id) ? 'selected' : '' }}>
+                                    {{ $area->name }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="delivery-address" class="form-label">Delivery Address</label>
-                            <input type="text" name="delivery_address" id="delivery-address" class="form-control" required>
+                            <input type="text" name="delivery_address" id="delivery-address" class="form-control" required value="{{ $cartData['order_info']['delivery_address'] ?? '' }}">
                         </div>
                         <div class="mb-3">
                             <label for="delivery-notes" class="form-label">Additional Notes</label>
-                            <textarea name="delivery_notes" id="delivery-notes" class="form-control" rows="3"></textarea>
+                            <textarea name="delivery_notes" id="delivery-notes" class="form-control" rows="3">{{ $cartData['order_info']['delivery_notes'] ?? '' }}</textarea>
                         </div>
                         <!-- At the end of #step-delivery -->
                         <div class="d-flex justify-content-between">
@@ -82,7 +91,7 @@
                             </div>
                             <div class="col-12">
                                 <label for="inputCompareatprice" class="form-label">Amount Paid</label>
-                                <input type="number" min="0" step="any" class="form-control" name="amount" id="amount-paid">
+                                <input type="number" min="0" step="any" class="form-control" name="amount" id="amount-paid" value="{{ $cartData['order_info']['total_amount'] ?? '' }}">
                             </div>
                             <div class="d-flex justify-content-between mt-3">
                                 <button class="btn btn-secondary" type="button" id="back-to-delivery">Back</button>
@@ -104,11 +113,11 @@
                         </ul>
                         <div class="d-flex justify-content-between">
                             <button class="btn btn-secondary" type="button" id="back-to-payment">Back</button>
-                            <input type="hidden" id="selected-customer-id" name="customer_id">
-                            <input type="hidden" name="delivery_area_id" id="form-delivery-area">
-                            <input type="hidden" name="delivery_address" id="form-delivery-address">
-                            <input type="hidden" name="delivery_notes" id="form-delivery-notes">
-                            <input type="hidden" name="order_cart_id" class="orderCartId">
+                            <input type="hidden" id="selected-customer-id" name="customer_id" value="{{ $cartData['order_info']['customer_id'] ?? '' }}">
+                            <input type="hidden" name="delivery_area_id" id="form-delivery-area" value="{{ $cartData['order_info']['delivery_area_id'] ?? '' }}">
+                            <input type="hidden" name="delivery_address" id="form-delivery-address" value="{{ $cartData['order_info']['delivery_address'] ?? '' }}">
+                            <input type="hidden" name="delivery_notes" id="form-delivery-notes" value="{{ $cartData['order_info']['delivery_notes'] ?? '' }}">
+                            <input type="hidden" name="order_cart_id" class="orderCartId" value="{{$orderCartId}}">
                             <button type="submit" class="btn btn-success">Submit Order</button>
                         </div>
                     </div>
@@ -133,7 +142,7 @@
                 let html = '';
                 if (data.length) {
                     data.forEach(customer => {
-                        html += `<div class="customer-option" data-id="${customer.id}">${customer.first_name}, ${customer.last_name} (${customer.phone})</div>`;
+                        html += `<div id="customer-option" class="customer-option" data-id="${customer.id}">${customer.first_name}, ${customer.last_name} (${customer.phone})</div>`;
                     });
                 } else {
                     html = '<p>No customer found.</p>';
@@ -146,6 +155,8 @@
         $(document).on('click', '.customer-option', function() {
             const customerId = $(this).data('id');
             $('#selected-customer-id').val(customerId);
+            //update order info
+            updateOrderInformation('selected_customer_id');
             $('#step-customer').addClass('d-none');
             $('#step-delivery').removeClass('d-none');
         });
@@ -186,6 +197,9 @@
                 alert('Select Customer first.');
                 return;
             }
+            //update order info
+            updateOrderInformation('selected_customer_id');
+
             $('#step-customer').addClass('d-none');
             $('#step-delivery').removeClass('d-none');
         });
@@ -200,6 +214,10 @@
                 alert('Fill delivery area and address.');
                 return;
             }
+
+            //update order information
+            updateOrderInformation('selected_delivery_area_id');
+
             $('#step-delivery').addClass('d-none');
             $('#step-payment').removeClass('d-none');
         });
@@ -239,5 +257,50 @@
             $('#form-delivery-address').val($('#delivery-address').val());
             $('#form-delivery-notes').val($('#delivery-notes').val());
         });
+
     });
+
+    function updateOrderInformation(fieldName) {
+
+        if (!orderCartId) {
+            console.error('Order Cart ID is missing.');
+            return;
+        }
+
+        let data = {
+            _token: '{{ csrf_token() }}',
+            order_cart_id: orderCartId,
+        };
+
+        // Add only the changed field to the payload
+        switch (fieldName) {
+            case 'selected_customer_id':
+                data.selected_customer_id = $('#selected-customer-id').val();
+                data.customer_name = $('.customer-option[data-id="' + $('#selected-customer-id').val() + '"]').text()
+                break;
+            case 'selected_table_id':
+                data.selected_table_id = $('#selected-table-id').val();
+                break;
+            case 'selected_delivery_area_id':
+                data.selected_delivery_area_id = $('#delivery-area').val();
+                data.delivery_address = $('#delivery-address').val();
+                data.delivery_notes = $('#delivery-notes').val();
+                break;
+            default:
+                console.warn('Unknown field passed to updateOrderInformation');
+                return;
+        }
+
+        $.ajax({
+            url: '{{ route("cart.update.order-info") }}',
+            method: 'POST',
+            data: data,
+            success: function(response) {
+                console.log(response);
+            },
+            error: function() {
+                alert('Failed to update order info.');
+            }
+        });
+    }
 </script>

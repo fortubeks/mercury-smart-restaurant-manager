@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RestaurantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,24 +20,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     //Settings
-    Route::get('settings', [DashboardController::class, 'settings'])->name('settings');
+    Route::get('settings', [\App\Http\Controllers\AppSettingController::class, 'settings'])->name('settings');
 
     //Restaurant
-    Route::resource('restaurants', RestaurantController::class);
+    Route::resource('restaurants', \App\Http\Controllers\RestaurantController::class);
+
+    //Accounting
+    Route::resource('daily-sales', \App\Http\Controllers\DailySaleController::class);
 
     //Customers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
     Route::get('search/customers', [\App\Http\Controllers\CustomerController::class, 'search'])->name('search.customers');
+
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);
+
     //Menu
     Route::resource('menu', \App\Http\Controllers\MenuController::class);
+
     //Menu Categories
     Route::resource('menu-categories', \App\Http\Controllers\MenuCategoryController::class);
+
     //Menu Items
     Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class);
+
     //search menu items
     Route::get('search/menu-items', [\App\Http\Controllers\MenuItemController::class, 'search'])->name('search.menu-items');
+
     //Cart routes
     Route::post('cart/add', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
     Route::post('cart/update', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');
@@ -46,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('cart/clear', [\App\Http\Controllers\CartController::class, 'clear'])->name('cart.clear');
     Route::get('cart/edit', [\App\Http\Controllers\CartController::class, 'edit'])->name('cart.edit');
     Route::post('cart/delete', [\App\Http\Controllers\CartController::class, 'delete'])->name('cart.delete');
+    Route::post('cart/update-order-information', [\App\Http\Controllers\CartController::class, 'updateOrderInformation'])->name('cart.update.order-info');
     //Printer
     Route::get('printer/cart/{id}', [\App\Http\Controllers\PrinterController::class, 'printCart'])->name('printer.cart');
     Route::get('printer/order/{order}', [\App\Http\Controllers\PrinterController::class, 'printOrder'])->name('printer.order');
@@ -124,6 +133,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //set shift
     Route::post('shift/set', [\App\Http\Controllers\UserController::class, 'setShift'])->name('shift.set');
 });
-Route::get('setting/restaurant/edit', [RestaurantController::class, 'editRestaurant'])->name('settings.restaurant.edit');
-Route::post('restaurant/update', [RestaurantController::class, 'updateRestaurant'])->name('restaurant.update');
+Route::get('setting/restaurant/edit', [\App\Http\Controllers\RestaurantController::class, 'editRestaurant'])->name('settings.restaurant.edit');
+Route::post('restaurant/update', [\App\Http\Controllers\RestaurantController::class, 'updateRestaurant'])->name('restaurant.update');
 require __DIR__ . '/auth.php';

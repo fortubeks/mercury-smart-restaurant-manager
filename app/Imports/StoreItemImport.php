@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\StoreItem;
+use App\Models\StoreItemCategory;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStartRow;
@@ -16,7 +17,7 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
 
     public function __construct()
     {
-        $this->store_id = auth()->user()->userAccount->hotel->store->id;
+        $this->store_id = auth()->user()->userAccount->restaurant->defaultStore->id;
     }
     /**
      * @param array $row
@@ -35,8 +36,12 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
             $this->errors[] = "Row " . ($this->importedItemCount + 2) . " has missing required fields.";
             return null; // Skip this row
         }
-        
-        $item_category_id = getItemCategoryId($row[2]);
+
+        //$item_category_id = getItemCategoryId($row[2]);
+        $category = StoreItemCategory::firstOrCreate([
+            'restaurant_id' => restaurantId(),
+            'name' => ucfirst(strtolower($row[2]))
+        ]);
         $code = generateUniqueItemCode();
         $this->importedItemCount++;
 
@@ -44,7 +49,7 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
             'name' => $row[0],
             'description' => $row[1],
             'store_id' => $this->store_id,
-            'item_category_id' => $item_category_id,
+            'item_category_id' => $category->id,
             'code' => $code,
             'unit_measurement' => $row[3],
             'qty' => $row[4],

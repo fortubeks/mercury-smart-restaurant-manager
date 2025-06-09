@@ -1,0 +1,7 @@
+name,description,category,unit_measurement,qty,for_sale,low_stock_alert,cost_price,selling_price
+Chicken,,Food,pcs,4,TRUE,,,
+Heinekken,,Drink,pcs,24,TRUE,,300,2500
+Liquid Soap,,Housekeeping,kg,3.5,FALSE,,,
+Biro,,Administrative,pcs,40,FALSE,,,
+Bulbs,,Maintenance,pcs,22,FALSE,,,
+Yam,,Staff,pcs,3,FALSE,,,

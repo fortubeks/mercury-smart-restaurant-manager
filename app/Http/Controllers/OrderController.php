@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Orders\OrderStoreRequest;
 use App\Models\DailySale;
+use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\MenuItemOrder;
 use App\Models\Order;
@@ -69,11 +70,12 @@ class OrderController extends Controller
 
         $orderCartId = Carbon::now()->timestamp;
         $menuItems = MenuItem::where('outlet_id', $outletId)->where('is_available', true)->orderBy('name', 'asc')->get();
+        $menuCategories = MenuCategory::with('menuItems')->where('outlet_id', $outletId)->orderBy('name', 'asc')->get();
 
         //check if there is a sales record for the selected date. so that if there is, hide the submit buttons
         $dailySalesRecord = DailySale::where('restaurant_id', restaurantId())->where('shift_date', $user->current_shift)->first();
 
-        return theme_view('orders.create')->with(compact('menuItems', 'outletId', 'orderCartId', 'dailySalesRecord'));
+        return theme_view('orders.create')->with(compact('menuItems', 'menuCategories', 'outletId', 'orderCartId', 'dailySalesRecord'));
     }
 
     public function show(Order $order)
@@ -111,13 +113,14 @@ class OrderController extends Controller
         $total_amount = $cart[$orderCartId]['order_info']['total_amount'];
         $sub_total = $cart[$orderCartId]['order_info']['sub_total'];
         $tax_amount = $cart[$orderCartId]['order_info']['tax_amount'];
-        $room_id = $cart[$orderCartId]['order_info']['room_id'] ?? '';
         $customer_id = $cart[$orderCartId]['order_info']['customer_id'] ?? null;
+        $delivery_address = $cart[$orderCartId]['order_info']['delivery_address'] ?? null;
+        $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ?? null;
 
         $request->merge([
             'total_amount' => $total_amount,
+            'sub_total' => $sub_total,
             'customer_id' => $customer_id,
-            'room_id' => $room_id,
             'tax_amount' => $tax_amount,
             'date_of_payment' => $orderDate
         ]);
@@ -141,10 +144,11 @@ class OrderController extends Controller
                 'total_amount',
                 'created_by'
             ]);
+            $orderData = $request->all();
 
             // Create the order
             $order = Order::create($orderData);
-            $order->update(['sub_total' => $sub_total]);
+            //$order->update(['sub_total' => $sub_total]);
 
             // Retrieve the items from the cart order
             $items = $cart[$orderCartId]['items'];
@@ -179,7 +183,7 @@ class OrderController extends Controller
             DB::rollBack();
 
             // Redirect the user back to the previous page with an error message
-            return back()->withErrors([
+            return redirect('/cart/edit?id=' . $orderCartId)->withErrors([
                 'error' => 'An error occurred. Please try again.',
             ]);
         }

@@ -6,7 +6,7 @@
             <div class="card-body">
                 <div class="d-lg-flex align-items-center mb-4 gap-3">
                     <!-- <div class="position-relative">
-                        <input type="text" class="form-control ps-5 radius-30" placeholder="Search by Guest or Room No"> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control ps-5 radius-30" placeholder="Search by Customer"> <span class="position-absolute top-50 product-show translate-middle-y"><i class="bx bx-search"></i></span>
                     </div> -->
                     <div class="position-relative">
 
@@ -79,7 +79,7 @@
                             <tr>
                                 <th>Time</th>
                                 <th>Ref</th>
-                                <th>Guest</th>
+                                <th>Customer</th>
                                 <th>Items</th>
                                 <th>Status</th>
                                 <th>Total</th>
@@ -151,7 +151,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <form method="POST" action="{{url('cart/delete')}}">
                         @csrf
-                        <input type="hidden" name="restaurant_cart_order_id" id="deleteCartIdInput" value="">
+                        <input type="hidden" name="order_cart_id" id="deleteCartIdInput" value="">
                         <button type="submit" class="btn btn-danger">Yes, Delete</button>
                     </form>
                 </div>

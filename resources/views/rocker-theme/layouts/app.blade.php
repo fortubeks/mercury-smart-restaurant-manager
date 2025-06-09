@@ -51,25 +51,16 @@
             <!--navigation-->
             <ul class="metismenu" id="menu">
                 <li>
-                    <a href="javascript:;" class="has-arrow">
-                        <div class="parent-icon"><i class='bx bx-home-alt'></i>
-                        </div>
+                    <a href="{{ route('dashboard') }}" class="">
+                        <div class="parent-icon"><i class="bx bx-home-circle"></i></div>
                         <div class="menu-title">Dashboard</div>
                     </a>
-                    <ul>
-                        <li> <a href="index.html"><i class='bx bx-radio-circle'></i>Default</a>
-                        </li>
-                        <li> <a href="index2.html"><i class='bx bx-radio-circle'></i>Alternate</a>
-                        </li>
-                        <li> <a href="index3.html"><i class='bx bx-radio-circle'></i>Graphical</a>
-                        </li>
-                    </ul>
                 </li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"> <i class="bx bx-restaurant"></i>
                         </div>
-                        <div class="menu-title">Restaurant</div>
+                        <div class="menu-title">Orders</div>
                     </a>
                     <ul>
                         <li> <a href="{{ route('orders.index') }}"><i class='bx bx-radio-circle'></i>View Orders</a></li>
@@ -78,7 +69,7 @@
                 </li>
                 <li>
                     <a class="has-arrow" href="javascript:;">
-                        <div class="parent-icon"> <i class="bx bx-user"></i>
+                        <div class="parent-icon"> <i class="bx bx-book"></i>
                         </div>
                         <div class="menu-title">Menu</div>
                     </a>
@@ -108,7 +99,16 @@
                         <div class="menu-title">Audit/Accounting</div>
                     </a>
                     <ul>
-
+                        <li> <a class="loading-screen" href="{{ route('daily-sales.create') }}"><i class='bx bx-radio-circle'></i>New Audit</a></li>
+                        <li><a href="{{ route('daily-sales.index') }}"><i class='bx bx-radio-circle'></i>View Audits</a></li>
+                        <li><a class="loading-screen" href="{{ url('sales-dashboard') }}"><i class='bx bx-radio-circle'></i>Sales Dashboard</a></li>
+                        <li><a href="{{ route('bank-accounts.index') }}"><i class='bx bx-radio-circle'></i>Bank Accounts</a></li>
+                        <li><a class="loading-screen" href="{{ route('payments.index') }}"><i class='bx bx-radio-circle'></i>Incoming Payments</a></li>
+                        <li><a href="{{ route('outgoing-payments.index') }}"><i class='bx bx-radio-circle'></i>Outgoing Payments</a></li>
+                        <li><a href="{{ route('reports.index') }}"><i class='bx bx-radio-circle'></i>Reports</a></li>
+                        @if(auth()->user()->userAccount->hotels->count() > 1)
+                        <li><a href="{{ route('consolidated-report') }}"><i class='bx bx-radio-circle'></i>Consolidated Report </a></li>
+                        @endif
                     </ul>
                 </li>
                 <li>
@@ -157,11 +157,8 @@
                         <!-- Add the "Inventories" dropdown -->
                         <li>
                             <a class="has-arrow" href="javascript:;">
-
                                 <i class="bx bx-store"></i> Incoming & Outgoing
                             </a>
-                            <ul>
-                            </ul>
                         </li>
                     </ul>
                 </li>
@@ -213,16 +210,14 @@
 
                 <li>
                     <a href="https://wa.me/2348090839412" target="_blank">
-                        <div class="parent-icon"><i class="bx bx-support"></i>
-                        </div>
+                        <div class="parent-icon"><i class="bx bx-support"></i></div>
                         <div class="menu-title">Support</div>
                     </a>
                 </li>
 
                 <li>
                     <a href="#" target="_blank">
-                        <div class="parent-icon"><i class="bx bx-video"></i>
-                        </div>
+                        <div class="parent-icon"><i class="bx bx-video"></i></div>
                         <div class="menu-title">Tutorials</div>
                     </a>
                 </li>

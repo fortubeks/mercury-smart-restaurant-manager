@@ -46,7 +46,7 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
-        return theme_view('customers.show', [
+        return theme_view('customers.form', [
             'customer' => $customer
         ]);
     }

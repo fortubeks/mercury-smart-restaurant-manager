@@ -115,7 +115,7 @@
                                                 </div>
                                                 <input type="number" name="combo_items[{{ $comboItem->id }}][quantity]"
                                                     step="0.01" placeholder="Qty used" class="ml-2 w-24 form-control"
-                                                    value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->quantity }}">
+                                                    value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->qty }}">
                                             </div>
                                             @endforeach
                                         </div>

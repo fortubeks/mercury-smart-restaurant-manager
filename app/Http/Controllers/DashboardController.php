@@ -8,6 +8,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        return theme_view('dashboard');
+        $user = auth()->user();
+        return theme_view('dashboard')->with('user', $user);
     }
 }

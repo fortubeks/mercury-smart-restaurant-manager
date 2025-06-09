@@ -15,7 +15,7 @@ class OrderItemService
                 'order_id' => $order->id,
                 'menu_item_id' => $itemId,
                 'qty' => $item['quantity'],
-                'amount' => $item['amount'],
+                'sub_total' => $item['total'],
                 'tax_rate' => calculateTaxRate(),
                 'tax_amount' => $item['tax'],
                 'discount_rate' => 0,
