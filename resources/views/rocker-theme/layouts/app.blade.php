@@ -103,12 +103,10 @@
                         <li><a href="{{ route('daily-sales.index') }}"><i class='bx bx-radio-circle'></i>View Audits</a></li>
                         <li><a class="loading-screen" href="{{ url('sales-dashboard') }}"><i class='bx bx-radio-circle'></i>Sales Dashboard</a></li>
                         <li><a href="{{ route('bank-accounts.index') }}"><i class='bx bx-radio-circle'></i>Bank Accounts</a></li>
-                        <li><a class="loading-screen" href="{{ route('payments.index') }}"><i class='bx bx-radio-circle'></i>Incoming Payments</a></li>
+                        <li><a class="loading-screen" href="{{ route('incoming-payments.index') }}"><i class='bx bx-radio-circle'></i>Incoming Payments</a></li>
                         <li><a href="{{ route('outgoing-payments.index') }}"><i class='bx bx-radio-circle'></i>Outgoing Payments</a></li>
                         <li><a href="{{ route('reports.index') }}"><i class='bx bx-radio-circle'></i>Reports</a></li>
-                        @if(auth()->user()->userAccount->hotels->count() > 1)
-                        <li><a href="{{ route('consolidated-report') }}"><i class='bx bx-radio-circle'></i>Consolidated Report </a></li>
-                        @endif
+
                     </ul>
                 </li>
                 <li>

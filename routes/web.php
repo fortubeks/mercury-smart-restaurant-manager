@@ -27,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Accounting
     Route::resource('daily-sales', \App\Http\Controllers\DailySaleController::class);
+    Route::resource('bank-accounts', \App\Http\Controllers\BankAccountController::class);
+    //report.index
+    Route::get('reports/index', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
 
     //Customers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
@@ -101,6 +104,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('outgoing-payments', \App\Http\Controllers\OutgoingPaymentController::class);
     Route::get('outgoing-payments/search', [\App\Http\Controllers\OutgoingPaymentController::class, 'search'])->name('outgoing-payments.search');
     Route::post('outgoing-payment/purchase', [\App\Http\Controllers\OutgoingPaymentController::class, 'storePurchasePayment'])->name('outgoing-payments.purchase.store');
+    Route::resource('incoming-payments', \App\Http\Controllers\IncomingPaymentController::class);
     //Expenses
     Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
     Route::get('expense/all', [\App\Http\Controllers\ExpenseController::class, 'allExpenses'])->name('expenses.all');
