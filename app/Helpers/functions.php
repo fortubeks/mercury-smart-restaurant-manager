@@ -124,8 +124,8 @@ function getStatusOptions()
 function getActiveOptions()
 {
     return [
-        'in-active' => 'In Active',
-        'active' => 'Active',
+        '0' => 'In Active',
+        '1' => 'Active',
     ];
 }
 

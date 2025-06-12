@@ -35,7 +35,7 @@ class AppSettingController extends Controller
         // Mass update with boolean casting
         $settings->update([
             'manage_stock' => $request->boolean('manage_stock'),
-            //'include_tax' => $request->boolean('include_tax'),
+            'include_tax' => $request->boolean('include_tax'),
         ]);
 
         // Sync selected module IDs, default to empty array if none sent

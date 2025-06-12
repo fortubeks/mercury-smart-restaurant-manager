@@ -68,4 +68,9 @@ class Restaurant extends Model
     {
         return $this->hasMany(ExpenseCategory::class);
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

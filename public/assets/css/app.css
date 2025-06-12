@@ -2725,3 +2725,20 @@ input::placeholder {
 .table {
 	font-size: 110%;
 }
+
+.user-photo {
+	width: 40px;
+	height: auto;
+}
+
+.scrollable-table-container {
+	overflow-x: auto;
+	max-width: 100%;
+	width: 100%;
+}
+
+.small-font {
+	font-size: smaller;
+	color: gray;
+	/* Example styling */
+}

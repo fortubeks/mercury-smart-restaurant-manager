@@ -9,7 +9,7 @@ class DailySaleController extends Controller
 {
     public function index(DailySale $model)
     {
-        return theme_view('daily-sales.index', [
+        return theme_view('rocker-theme.daily-sales.index', [
             'sales' => $model->where('restaurant_id', restaurantId())->latest()->get()
         ]);
     }

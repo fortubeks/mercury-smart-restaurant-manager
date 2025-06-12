@@ -24,6 +24,7 @@
                                 <th>Total Supplies</th>
                                 <th>Total Payment</th>
                                 <th>Total Balance</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         @if ($suppliers->count())
@@ -37,7 +38,15 @@
                                 <td>{{ formatCurrency( $supplier->getTotalSupplyAmount() ) }}</td>
                                 <td>{{ formatCurrency($supplier->getTotalPaymentsAmount()) }}</td>
                                 <td>{{ formatCurrency($supplier->getBalance()) }}</td>
-
+                                <td>
+                                    <div class="d-flex order-actions">
+                                        <a class="ms-3" href="{{route('suppliers.show',$supplier->id)}}"><i class="bx bxs-show"></i></a>
+                                        <a class="ms-3" href="{{ route('suppliers.edit', $supplier->id) }}"><i class='bx bxs-edit'></i></a>
+                                        <a class="ms-3" href="javascript:void(0);" data-resource-id="{{ $supplier->id }}" data-resource-url="{{ url('suppliers') }}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal">
+                                            <i class="bx bxs-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

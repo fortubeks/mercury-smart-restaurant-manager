@@ -47,7 +47,7 @@
                                             value="{{ $module->id }}"
                                             role="switch"
                                             id="moduleSwitch{{ $module->id }}"
-                                            {{ $restaurant->modules->contains($module->id) ? 'checked' : '' }}>
+                                            {{ $appSetting->restaurant->modules->contains($module->id) ? 'checked' : '' }}>
                                         <label
                                             class="form-check-label"
                                             for="moduleSwitch{{ $module->id }}">

@@ -30,12 +30,11 @@
                             <tr>
                                 <td>{{ $tax->name }}</td>
                                 <td>{{ $tax->rate }}</td>
-                                <td>{{ $tax->is_active }}</td>
+                                <td><x-status-text :status="$tax->is_active" /></td>
                                 <td>
                                     <div class="d-flex order-actions">
-                                        <a href="{{ route('taxes.edit', $tax->id) }}">
-                                            <i class='bx bxs-edit'></i>
-                                        </a>
+                                        <a href="{{ route('taxes.edit', $tax->id) }}"><i class='bx bxs-edit'></i></a>
+                                        <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$tax->id}}" data-resource-url="{{url('taxes')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -50,4 +49,5 @@
             </div>
         </div>
     </div>
+    @include('rocker-theme.layouts.partials.delete-modal')
 </div>

@@ -24,11 +24,6 @@ class Supplier extends Model
         return $this->hasMany(Expense::class);
     }
 
-    public function purchase()
-    {
-        return $this->belongsTo(Purchase::class);
-    }
-
     public function purchases()
     {
         return $this->hasMany(Purchase::class);

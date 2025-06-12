@@ -50,35 +50,6 @@
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6 ">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="card-header mb-3">
-                            <h5>Bulk SMS Settings</h4>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>View or Edit Your Bulk SMS Settings</span>
-                            <a href="{{route('settings.bulk-sms')}}" class="btn btn-primary btn-sm">View</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-xl-6 ">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="card-header mb-3">
-                            <h5>Booking & Reservation</h4>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>View or Edit Settings For Your Booking Engine & Reservation</span>
-                            <a href="{{route('settings.booking-engine')}}" class="btn btn-primary btn-sm">View</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

@@ -61,7 +61,6 @@
                                             <i class='bx bx-show'></i>
                                         </a>
                                         <a class="ms-3 delete-resource" href="javascript:void(0);" data-resource-id="{{$menuItem->id}}" data-resource-url="{{url('menu-items')}}" data-bs-toggle="modal" data-bs-target="#deleteResourceModal"><i class="bx bxs-trash"></i></a>
-
                                     </div>
                                 </td>
                             </tr>

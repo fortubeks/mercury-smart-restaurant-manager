@@ -176,6 +176,8 @@
                 _token: '{{ csrf_token() }}'
             }, function(data) {
                 $('#selected-customer-id').val(data.id);
+                html = `<div id="customer-option" class="customer-option" data-id="${data.id}">${data.first_name}, (${data.phone})</div>`;
+                $('#customer-results').html(html);
                 $('#step-customer').addClass('d-none');
                 $('#step-delivery').removeClass('d-none');
             });

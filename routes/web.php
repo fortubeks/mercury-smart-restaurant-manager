@@ -28,8 +28,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Accounting
     Route::resource('daily-sales', \App\Http\Controllers\DailySaleController::class);
     Route::resource('bank-accounts', \App\Http\Controllers\BankAccountController::class);
+    Route::resource('bank-account-transactions', \App\Http\Controllers\BankAccountTransactionController::class);
     //report.index
     Route::get('reports/index', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('report/daily-sales', [\App\Http\Controllers\DailySaleController::class, 'index'])->name('reports.daily-sales-summary');
+
+    Route::post('report/generate-report', [\App\Http\Controllers\ReportController::class, 'generateReport'])->name('reports.generate-report');
+    Route::get('/report/download-report', [\App\Http\Controllers\ReportController::class, 'downloadReport'])->name('reports.download');
 
     //Customers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);

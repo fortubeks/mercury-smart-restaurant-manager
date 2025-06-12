@@ -37,7 +37,9 @@ class SupplierController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return theme_view('suppliers.form', [
+            'supplier' => Supplier::findOrFail($id),
+        ]);
     }
 
     /**
@@ -67,6 +69,11 @@ class SupplierController extends Controller
     public function destroy(string $id)
     {
         $supplier = Supplier::findOrFail($id);
+        //if supplier has expenses or purchases, do not delete
+        if ($supplier->expenses()->count() > 0 || $supplier->purchases()->count() > 0) {
+            return redirect()->route('suppliers.index')->with('error_message', 'Cannot delete supplier with expenses or purchases');
+        }
+        //delete the supplier
         $supplier->delete();
         return redirect()->route('suppliers.index')->with('success_message', 'Supplier Deleted Successfully');
     }

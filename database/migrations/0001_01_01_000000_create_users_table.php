@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->string('phone')->unique();
+            $table->string('address')->nullable();
             $table->date('current_shift')->nullable();
             $table->unsignedBigInteger('role_id')->nullable();
             $table->boolean('is_active')->default(true);
