@@ -36,7 +36,33 @@ class Expense extends Model
 
     public function outgoingPayments()
     {
-        return $this->belongsToMany(OutgoingPayment::class, 'expense_outgoing_payment')
-            ->withTimestamps();
+        return $this->morphMany(OutgoingPayment::class, 'payable');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(ExpenseExpenseItem::class, 'expense_id');
+    }
+
+    public function getItems()
+    {
+        $itemsString = '';
+        $itemNames = $this->items->map(function ($expenseItem) {
+            return $expenseItem->expenseItem->name;
+        })->toArray();
+
+        $itemsString = implode(', ', $itemNames);
+        return $itemsString;
+    }
+    public function paymentStatus()
+    {
+        $status = "Not Paid";
+        if ($this->outgoingPayments()->sum('amount') >= $this->amount) {
+            $status = "All Paid";
+        }
+        if ($this->outgoingPayments()->sum('amount') < $this->amount  && $this->outgoingPayments()->sum('amount') > 0) {
+            $status = "Part Paid";
+        }
+        return $status;
     }
 }

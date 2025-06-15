@@ -179,7 +179,7 @@
                     <a class="has-arrow" href="javascript:;">
                         <div class="parent-icon"> <i class="bx bx-cog"></i>
                         </div>
-                        <div class="menu-title">Property Settings</div>
+                        <div class="menu-title">Restaurant Settings</div>
                     </a>
                     <ul>
                         <li>
@@ -193,6 +193,12 @@
                             <a href="{{ route('settings.index') }}" class="">
                                 <div class="parent-icon"><i class='bx bx-info-circle'></i></div>
                                 <div class="menu-title">Settings</div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('delivery-riders.index') }}" class="">
+                                <div class="parent-icon"><i class="bx bx-user"></i></div>
+                                <div class="menu-title">Delivery Riders</div>
                             </a>
                         </li>
                         <li>

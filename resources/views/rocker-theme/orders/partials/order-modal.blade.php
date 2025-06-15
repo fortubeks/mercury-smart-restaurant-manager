@@ -39,7 +39,7 @@
                         <div class="tab-title">Delivery Information</div>
                         <div class="mb-3">
                             <label for="delivery-area" class="form-label">Delivery Area</label>
-                            <select class="form-select" name="delivery_area_id" id="delivery-area" required>
+                            <select class="form-select" name="delivery_area_id" id="delivery-area">
                                 <option value="">--Select Area--</option>
                                 @foreach(getModelList('delivery-areas') as $area)
                                 <option value="{{ $area->id }}"
@@ -51,7 +51,23 @@
                         </div>
                         <div class="mb-3">
                             <label for="delivery-address" class="form-label">Delivery Address</label>
-                            <input type="text" name="delivery_address" id="delivery-address" class="form-control" required value="{{ $cartData['order_info']['delivery_address'] ?? '' }}">
+                            <input type="text" name="delivery_address" id="delivery-address" class="form-control" value="{{ $cartData['order_info']['delivery_address'] ?? '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="delivery-fee" class="form-label">Delivery Fee</label>
+                            <input type="number" name="delivery_fee" id="delivery-fee" class="form-control" value="{{ $cartData['order_info']['delivery_fee'] ?? '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="delivery-rider" class="form-label">Assign Rider</label>
+                            <select class="form-select" name="delivery_rider_id" id="delivery-rider">
+                                <option value="">--Select Rider--</option>
+                                @foreach(getModelList('delivery-riders') as $rider)
+                                <option value="{{ $rider->id }}"
+                                    {{ (isset($cartData['order_info']['delivery_rider_id']) && $cartData['order_info']['delivery_rider_id'] == $rider->id) ? 'selected' : '' }}>
+                                    {{ $rider->name }} ({{ $rider->phone }})
+                                </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="delivery-notes" class="form-label">Additional Notes</label>
@@ -107,6 +123,8 @@
                             <li class="list-group-item"><strong>Customer:</strong> <span id="summary-customer"></span></li>
                             <li class="list-group-item"><strong>Delivery Area:</strong> <span id="summary-area"></span></li>
                             <li class="list-group-item"><strong>Address:</strong> <span id="summary-address"></span></li>
+                            <li class="list-group-item"><strong>Rider:</strong> <span id="summary-rider"></span></li>
+                            <li class="list-group-item"><strong>Delivery Fee:</strong> ₦ <span id="summary-fee"></span></li>
                             <li class="list-group-item"><strong>Notes:</strong> <span id="summary-notes"></span></li>
                             <li class="list-group-item"><strong>Amount:</strong> ₦<span id="summary-amount"></span></li>
                             <li class="list-group-item"><strong>Payment Mode:</strong> <span id="summary-mode"></span></li>
@@ -116,6 +134,8 @@
                             <input type="hidden" id="selected-customer-id" name="customer_id" value="{{ $cartData['order_info']['customer_id'] ?? '' }}">
                             <input type="hidden" name="delivery_area_id" id="form-delivery-area" value="{{ $cartData['order_info']['delivery_area_id'] ?? '' }}">
                             <input type="hidden" name="delivery_address" id="form-delivery-address" value="{{ $cartData['order_info']['delivery_address'] ?? '' }}">
+                            <input type="hidden" name="delivery_rider_id" id="form-delivery-rider" value="{{ $cartData['order_info']['delivery_rider_id'] ?? '' }}">
+                            <input type="hidden" name="delivery_fee" id="form-delivery-fee" value="{{ $cartData['order_info']['delivery_fee'] ?? '' }}">
                             <input type="hidden" name="delivery_notes" id="form-delivery-notes" value="{{ $cartData['order_info']['delivery_notes'] ?? '' }}">
                             <input type="hidden" name="order_cart_id" class="orderCartId" value="{{$orderCartId}}">
                             <button type="submit" class="btn btn-success">Submit Order</button>
@@ -240,6 +260,8 @@
             $('#summary-customer').text(customer);
             $('#summary-area').text($('#delivery-area option:selected').text());
             $('#summary-address').text($('#delivery-address').val());
+            $('#summary-rider').text($('#delivery-rider option:selected').text());
+            $('#summary-fee').text($('#delivery-fee').val());
             $('#summary-notes').text($('#delivery-notes').val());
             $('#summary-amount').text($('#amount-paid').val());
             $('#summary-mode').text($('[name="payment_method"] option:selected').text());
@@ -257,6 +279,8 @@
         $('form').on('submit', function() {
             $('#form-delivery-area').val($('#delivery-area').val());
             $('#form-delivery-address').val($('#delivery-address').val());
+            $('#form-delivery-rider').val($('#delivery-rider').val());
+            $('#form-delivery-fee').val($('#delivery-fee').val());
             $('#form-delivery-notes').val($('#delivery-notes').val());
         });
 
@@ -284,8 +308,10 @@
                 data.selected_table_id = $('#selected-table-id').val();
                 break;
             case 'selected_delivery_area_id':
-                data.selected_delivery_area_id = $('#delivery-area').val();
+                data.delivery_area_id = $('#delivery-area').val();
                 data.delivery_address = $('#delivery-address').val();
+                data.delivery_rider_id = $('#delivery-rider').val();
+                data.delivery_fee = $('#delivery-fee').val();
                 data.delivery_notes = $('#delivery-notes').val();
                 break;
             default:

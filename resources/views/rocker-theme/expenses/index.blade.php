@@ -170,7 +170,7 @@
                             @endphp
                             <tr>
                                 <td>{{ \Carbon\Carbon::createFromFormat('Y-m-d', $expense->expense_date)->format('jS, M Y') }}</td>
-                                <td>{{ $expense->category->name }}</td>
+                                <td>{{ $expense->expenseCategory->name }}</td>
                                 <td>{{ $expense->getItems() ?? '' }}</td>
                                 <td>{{ $expense->supplier->name ?? 'N/A' }}</td>
                                 <td>{{ $expense->paymentStatus() ?? '' }}</td>

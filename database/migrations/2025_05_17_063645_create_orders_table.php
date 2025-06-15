@@ -30,6 +30,8 @@ return new class extends Migration
             $table->decimal('discount_amount')->default(0.00);
             $table->decimal('total_amount', 10, 2);
             $table->string('delivery_address')->nullable(); // Free-text address
+            $table->foreignId('delivery_rider_id')->nullable()->constrained('delivery_riders')->onDelete('set null');
+            $table->decimal('delivery_fee', 8, 2)->default(0.00);
             $table->text('notes')->nullable();
             $table->timestamps();
         });

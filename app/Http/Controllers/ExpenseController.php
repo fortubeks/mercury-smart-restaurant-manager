@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\ExpenseExpenseItem;
 use App\Models\ExpenseItem;
+use App\Services\OutgoingPaymentService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -178,7 +179,7 @@ class ExpenseController extends Controller
                 'amount' => $total_amount,
                 'supplier_id' => $request->supplier_id,
                 'note' => $request->note,
-                'category_id' => $request->category_id,
+                'expense_category_id' => $request->category_id,
             ]);
 
             foreach ($request->description as $key => $description) {
@@ -187,7 +188,7 @@ class ExpenseController extends Controller
                 }
 
                 $expense_item = ExpenseItem::firstOrCreate(
-                    ['restaurant_id' => restaurantId(), 'name' => $description]
+                    ['restaurant_id' => restaurantId(), 'name' => $description, 'expense_category_id' => $request->category_id]
                 );
 
                 ExpenseExpenseItem::create([
@@ -208,21 +209,22 @@ class ExpenseController extends Controller
 
             //Handle payment
             if ($request->payment_amount) {
-                $request->validate([
-                    'payment_amount' => 'required',
+                $validatedPaymentRequest = $request->validate([
+                    'payment_amount' => 'required|numeric',
+                    'payment_method' => 'required|string',
                     'date_of_payment' => 'required',
-                    'mode_of_payment' => 'required',
-                    'bank_account_id' => 'required',
+                    'bank_account_id' => 'required'
+                ]);
+                $data = array_merge($validatedPaymentRequest, [
+                    'restaurant_id' => restaurantId(),
+                    'expense_id' => $expense->id,
+                    'amount' => $request->payment_amount,
                 ]);
 
-                ExpensePayment::create([
-                    'amount' => $request->payment_amount,
-                    'date_of_payment' => $request->date_of_payment,
-                    'restaurant_id' => $expense->restaurant_id,
-                    'mode_of_payment' => $request->mode_of_payment,
-                    'expense_id' => $expense->id,
-                    'bank_account_id' => $request->bank_account_id,
-                ]);
+                $payment = (new OutgoingPaymentService)->createForExpense($data);
+                if (!$payment) {
+                    return back()->with('error', 'Error adding expense. Contact support');
+                }
             }
 
             DB::commit();

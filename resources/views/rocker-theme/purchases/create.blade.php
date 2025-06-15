@@ -166,7 +166,7 @@
                                 </div>
                                 <div class="col-3">
                                     <label>{{ __('Mode of payment') }}</label>
-                                    <select name="mode_of_payment" class="form-select form-control">
+                                    <select name="payment_method" class="form-select form-control">
                                         <option value="cash">Cash</option>
                                         <option value="transfer">Transfer</option>
                                         <option value="pos">POS</option>

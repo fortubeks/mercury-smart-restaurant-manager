@@ -9,6 +9,7 @@ use App\Models\BankAccount;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\DeliveryArea;
+use App\Models\DeliveryRider;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\ExpenseItem;
@@ -178,6 +179,7 @@ function getModelList($model)
         'delivery-areas' => DeliveryArea::where('state_id', $restaurant->state_id)->orderBy('name')->get(),
         'unit-measurements' => ['Kilogram (Kg)' => 'kg', 'Pieces (pcs)' => 'pcs'],
         'modules' => Module::all(),
+        'delivery-riders' => DeliveryRider::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
 
         default => null,
     };

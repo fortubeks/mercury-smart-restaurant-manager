@@ -1,6 +1,6 @@
 @php
-$colorClass = ($status == '1' || $status === true) ? 'text-success' : 'text-danger';
-$text = ($status == '1' || $status === true) ? $trueLabel : $falseLabel;
+$colorClass = ($status == '1' || $status === true || $status === 'active') ? 'text-success' : 'text-danger';
+$text = ($status == '1' || $status === true || $status === 'active') ? $trueLabel : $falseLabel;
 @endphp
 
 <span class="{{ $colorClass }}">{{ $text }}</span>

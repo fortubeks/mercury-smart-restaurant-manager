@@ -38,14 +38,14 @@
                             @foreach ($sales as $sale)
                             <tr>
                                 <td><a class="loading-screen" href="{{route('daily-sales.show', $sale->id)}}">{{ $sale->shift_date }}</a></td>
-                                <td>₦{{number_format( $sale->totalCash()) }}</td>
-                                <td>₦{{ number_format($sale->totalPos()) }}</td>
-                                <td>₦{{ number_format($sale->totalTransfer()) }}</td>
-                                <td>₦{{number_format( $sale->totalWallet()) }}</td>
-                                <td>₦{{number_format( $sale->totalCredit()) }}</td>
-                                <td><strong>₦{{number_format( $sale->final_total) }}</strong></td>
-                                <td>₦{{number_format( $sale->total_deposits) }}</td>
-                                <td>₦{{number_format( $sale->total_outflows) }}</td>
+                                <td>₦{{number_format( $sale->cash) }}</td>
+                                <td>₦{{ number_format($sale->pos) }}</td>
+                                <td>₦{{ number_format($sale->transfer) }}</td>
+                                <td>₦{{number_format( $sale->wallet) }}</td>
+                                <td>₦{{number_format( $sale->credit) }}</td>
+                                <td><strong>₦{{number_format( $sale->total) }}</strong></td>
+                                <td>₦{{number_format( $sale->closing_balance) }}</td>
+                                <td>₦{{number_format( $sale->cash_outflow) }}</td>
                                 <td><a class="loading-screen" href="{{route('daily-sales.show', $sale->id)}}" class="loader"><i class="bx bxs-show"></i></a></td>
                             </tr>
                             @endforeach

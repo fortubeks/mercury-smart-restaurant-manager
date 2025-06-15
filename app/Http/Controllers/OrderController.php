@@ -115,6 +115,7 @@ class OrderController extends Controller
         $tax_amount = $cart[$orderCartId]['order_info']['tax_amount'];
         $customer_id = $cart[$orderCartId]['order_info']['customer_id'] ?? null;
         $delivery_address = $cart[$orderCartId]['order_info']['delivery_address'] ?? null;
+        $delivery_rider_id = $cart[$orderCartId]['order_info']['delivery_rider_id'] ?? null;
         $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ?? null;
 
         $request->merge([
@@ -122,7 +123,12 @@ class OrderController extends Controller
             'sub_total' => $sub_total,
             'customer_id' => $customer_id,
             'tax_amount' => $tax_amount,
-            'date_of_payment' => $orderDate
+            'date_of_payment' => $orderDate,
+            'delivery_address' => $delivery_address,
+            'delivery_rider_id' => $delivery_rider_id,
+            'delivery_area_id' => $delivery_area_id,
+            'created_by' => auth()->id(),
+            'outlet_id' => auth()->user()->outlet_id,
         ]);
 
         // Start a transaction
@@ -130,20 +136,20 @@ class OrderController extends Controller
 
         try {
             // Retrieve the restaurant order details from the request
-            $orderData = $request->only([
-                'outlet_id',
-                'customer_id',
-                'order_date',
-                'status',
-                'amount',
-                'tax_rate',
-                'tax_amount',
-                'discount_rate',
-                'discount_type',
-                'discount_amount',
-                'total_amount',
-                'created_by'
-            ]);
+            // $orderData = $request->only([
+            //     'outlet_id',
+            //     'customer_id',
+            //     'order_date',
+            //     'status',
+            //     'amount',
+            //     'tax_rate',
+            //     'tax_amount',
+            //     'discount_rate',
+            //     'discount_type',
+            //     'discount_amount',
+            //     'total_amount',
+            //     'created_by'
+            // ]);
             $orderData = $request->all();
 
             // Create the order

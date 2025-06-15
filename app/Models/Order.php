@@ -22,6 +22,9 @@ class Order extends Model
         'discount_amount',
         'reference',
         'notes',
+        'delivery_rider_id',
+        'delivery_area_id',
+        'delivery_address'
     ];
 
     protected static function boot()
@@ -42,6 +45,11 @@ class Order extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class, 'outlet_id');
     }
 
     public function payments()
@@ -66,6 +74,16 @@ class Order extends Model
         return $this->hasManyThrough(IncomingPayment::class, Settlement::class, 'payable_id', 'payable_id')
             ->where('settlements.payable_type', Order::class)
             ->where('incoming_payments.payable_type', Settlement::class);
+    }
+
+    public function deliveryRider()
+    {
+        return $this->belongsTo(DeliveryRider::class);
+    }
+
+    public function deliveryArea()
+    {
+        return $this->belongsTo(DeliveryArea::class);
     }
 
     public function getItems()

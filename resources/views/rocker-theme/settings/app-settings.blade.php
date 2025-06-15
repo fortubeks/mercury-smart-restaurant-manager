@@ -30,6 +30,12 @@
                                         <label class="form-check-label" for="flexSwitchCheckDefault3">Include Tax in Bill</label>
                                     </div>
                                 </div>
+                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="enable_delivery_rider" role="switch" id="flexSwitchCheckDefault3" {{ $appSetting->enable_delivery_rider == 1 ? 'checked' : ''}}>
+                                        <label class="form-check-label" for="flexSwitchCheckDefault3">Enable Delivery Rider</label>
+                                    </div>
+                                </div>
 
                             </div>
                             <div class="row">

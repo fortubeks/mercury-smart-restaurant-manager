@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('daily_sales', function (Blueprint $table) {
             $table->id();
             $table->foreignId('restaurant_id')->constrained()->onDelete('cascade');
-            $table->foreignId('outlet_id')->constrained()->onDelete('cascade');
 
             $table->date('shift_date'); // e.g., 2025-05-16
             $table->string('shift')->nullable(); // e.g., "morning", "evening" if multiple shifts used

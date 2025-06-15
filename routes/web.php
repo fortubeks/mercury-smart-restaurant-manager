@@ -43,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);
 
+    //Delivery Riders
+    Route::resource('delivery-riders', \App\Http\Controllers\DeliveryRiderController::class);
+
     //Menu
     Route::resource('menu', \App\Http\Controllers\MenuController::class);
 
