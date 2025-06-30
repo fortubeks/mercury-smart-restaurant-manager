@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('delivery_area_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('served_by')->nullable()->constrained('users')->onDelete('set null');
             $table->date('order_date'); //shift
+            $table->string('order_type')->default('delivery'); // dine_in, take_away, delivery
             $table->string('status')->default('settled'); //open,settled
             $table->string('payment_status')->default('pending');
             $table->string('reference')->unique()->nullable();

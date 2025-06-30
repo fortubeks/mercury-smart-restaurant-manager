@@ -32,12 +32,25 @@
                     </div>
                     <div class="position-relative">
                         <h5>Delivery Details</h5>
-                        <h6> @if ($order->deliveryRider)
-                            <a href="{{ route('delivery-riders.show', $order->delivery_rider_id) }}">Delivery Rider: {{ $order->deliveryRider->name }}</a>
-                            @else
-                            No Delivery Rider Assigned
-                            @endif
-                        </h6>
+                        <div id="rider-section-{{ $order->id }}">
+                            <h6>
+                                @if ($order->deliveryRider)
+                                <a href="{{ route('delivery-riders.show', $order->delivery_rider_id) }}">
+                                    Delivery Rider: {{ $order->deliveryRider->name }}
+                                </a>
+                                @else
+                                <div class="d-flex align-items-center gap-2">
+                                    <select id="rider_select_{{ $order->id }}" class="rider-select form-select" data-order-id="{{ $order->id }}">
+                                        <option value="">-- Select Rider --</option>
+                                        @foreach($availableRiders as $rider)
+                                        <option value="{{ $rider->id }}">{{ $rider->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
+                            </h6>
+                        </div>
+
                         <h6>@if ($order->deliveryArea)
                             Delivery Area: {{ $order->deliveryArea->name }}</a>
                             @else
@@ -77,6 +90,13 @@
                                 <td>{{formatCurrency($item->pivot->total_amount)}}</td>
                             </tr>
                             @endforeach
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">Delivery fee</td>
+                                <td>{{formatCurrency($order->delivery_fee)}}</td>
+                            </tr>
                         </tbody>
                         <tfoot>
                             <th></th>
@@ -138,6 +158,28 @@
     <script>
         window.addEventListener('load', function() {
 
+            $(document).on('change', '.rider-select', function() {
+                let riderId = $(this).val();
+                let orderId = $(this).data('order-id');
 
+                if (riderId) {
+                    $.ajax({
+                        url: '{{ route("orders.assignRider") }}',
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            order_id: orderId,
+                            rider_id: riderId
+                        },
+                        success: function(response) {
+                            $('#rider-section-' + orderId).html(response.html);
+                        },
+                        error: function(xhr) {
+                            alert('Failed to assign rider.');
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            });
         });
     </script>

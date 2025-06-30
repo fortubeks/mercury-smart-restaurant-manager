@@ -59,6 +59,11 @@ class Restaurant extends Model
         //return $this->hasOne(Store::class)->where('is_default', true);
     }
 
+    public function stores()
+    {
+        return $this->hasMany(Store::class);
+    }
+
     public function outlets()
     {
         return $this->hasMany(Outlet::class);

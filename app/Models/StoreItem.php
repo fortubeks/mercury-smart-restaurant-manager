@@ -54,9 +54,11 @@ class StoreItem extends Model
         return $category;
     }
 
-    public function purchase()
+    public function stores()
     {
-        return $this->belongsTo(Purchase::class);
+        return $this->belongsToMany(Store::class, 'store_store_items')
+            ->withPivot('qty', 'unit_cost', 'batch_number', 'expiry_date')
+            ->withTimestamps();
     }
 
     public function activities()
@@ -120,5 +122,23 @@ class StoreItem extends Model
         }
 
         return $openingStock;
+    }
+
+    public function getQtyForStore($storeId)
+    {
+        return $this->stores
+            ->firstWhere('pivot.store_id', $storeId)
+            ->pivot->qty ?? 0;
+    }
+
+    //use this when you have loaded only one store
+    public function getStoreQtyAttribute()
+    {
+        return $this->stores->first()->pivot->qty ?? 0;
+    }
+
+    public function getTotalQtyAttribute()
+    {
+        return $this->stores->sum(fn($store) => $store->pivot->qty ?? 0);
     }
 }

@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);
+    Route::post('/order/assign-rider', [\App\Http\Controllers\OrderController::class, 'assignRider'])->name('orders.assignRider');
 
     //Delivery Riders
     Route::resource('delivery-riders', \App\Http\Controllers\DeliveryRiderController::class);
@@ -54,6 +55,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     //Menu Items
     Route::resource('menu-items', \App\Http\Controllers\MenuItemController::class);
+    Route::get('menu-item/map', [\App\Http\Controllers\MenuItemController::class, 'showMappingForm'])->name('menu-items.mapping-form');
+    Route::post('menu-item/map', [\App\Http\Controllers\MenuItemController::class, 'mapMenuItems'])->name('menu-items.map.update');
+    Route::get('menu-item/import', [\App\Http\Controllers\MenuItemController::class, 'viewImportItemsForm'])->name('menu-items.import.form');
+    Route::get('menu-item/import/download-sample', [\App\Http\Controllers\MenuItemController::class, 'downloadSampleExcel'])->name('menu-items.import.download-sample');
+    Route::post('menu-item/import/new', [\App\Http\Controllers\MenuItemController::class, 'importItems'])->name('menu-items.import.new');
+    Route::post('menu-item/import/existing', [\App\Http\Controllers\MenuItemController::class, 'importItemsByUpdate'])->name('menu-items.import.existing');
+    Route::get('menu-item/download-existing', [\App\Http\Controllers\MenuItemController::class, 'downloadExistingMenuItems'])->name('menu-items.download-existing');
 
     //search menu items
     Route::get('search/menu-items', [\App\Http\Controllers\MenuItemController::class, 'search'])->name('search.menu-items');
@@ -78,7 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Store Items
     Route::resource('store-items', \App\Http\Controllers\StoreItemController::class);
 
-    Route::get('store-item/import', [\App\Http\Controllers\StoreItemController::class, 'viewImportItemsForm']);
+    Route::get('store-item/import', [\App\Http\Controllers\StoreItemController::class, 'viewImportItemsForm'])->name('store-item.import.form');
 
     Route::get('store-item/import/download-sample', [\App\Http\Controllers\StoreItemController::class, 'downloadSampleExcel'])->name('store-item.import.download-sample');
     Route::post('store-item/import/new', [\App\Http\Controllers\StoreItemController::class, 'importItems'])->name('store-item.import.new');
@@ -90,8 +98,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('store/give-items', [\App\Http\Controllers\StoreItemController::class, 'viewGiveItemsForm'])->name('store.give-items');
     Route::post('store/give-items', [\App\Http\Controllers\StoreItemController::class, 'giveItems'])->name('store.give-items.post');
 
-    Route::get('migrate-items', [\App\Http\Controllers\StoreItemController::class, 'viewMigrateItemsForm']);
-    Route::post('migrate-items', [\App\Http\Controllers\StoreItemController::class, 'migrateItems']);
+    Route::get('migrate-items', [\App\Http\Controllers\ItemMigrationController::class, 'viewMigrateItemsForm'])->name('store-item.migrate-items');
+    Route::post('migrate-items', [\App\Http\Controllers\ItemMigrationController::class, 'migrateItems'])->name('store-item.migrate-items.post');
 
     Route::get('incoming-inventories', [\App\Http\Controllers\StoreInventoryController::class, 'incomingItems'])->name('incoming-inventories');
     Route::get('outgoing-inventories', [\App\Http\Controllers\StoreInventoryController::class, 'outgoingItems'])->name('outgoing-inventories');

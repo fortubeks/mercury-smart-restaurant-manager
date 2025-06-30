@@ -29,6 +29,7 @@ use App\Models\Role;
 use App\Models\Room;
 use App\Models\RoomCategory;
 use App\Models\RoomReservation;
+use App\Models\Store;
 use App\Models\StoreItem;
 use App\Models\StoreItemCategory;
 use App\Models\Supplier;
@@ -180,6 +181,7 @@ function getModelList($model)
         'unit-measurements' => ['Kilogram (Kg)' => 'kg', 'Pieces (pcs)' => 'pcs'],
         'modules' => Module::all(),
         'delivery-riders' => DeliveryRider::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
+        'stores' => Store::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
 
         default => null,
     };

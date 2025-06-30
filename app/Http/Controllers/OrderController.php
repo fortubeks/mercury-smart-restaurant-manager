@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Orders\OrderStoreRequest;
 use App\Models\DailySale;
+use App\Models\DeliveryRider;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\MenuItemOrder;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index(Order $model, RestaurantSalesService $restaurantSalesService, RestaurantCartService $restaurantCartService)
+    public function index(Request $request, RestaurantSalesService $restaurantSalesService, RestaurantCartService $restaurantCartService)
     {
         // Authorize the user
         //$this->authorize('viewAny', $model);
@@ -29,7 +30,7 @@ class OrderController extends Controller
         $cartOrders = $restaurantCartService->getRestaurantCartOrders();
 
         // Fetch orders with optimized query, reusing loaded relationships
-        $orders = $model::with('customer', 'menuItems')->where('outlet_id', $user->outlet_id)
+        $orders = Order::with('customer', 'menuItems')->where('outlet_id', $user->outlet_id)
             ->where('order_date', $currentShift)
             ->get();
 
@@ -85,8 +86,9 @@ class OrderController extends Controller
         $order->paymentStatus = $paymentStatus['status'];
         $order->totalPayments = $paymentStatus['total_payments'];
         $order->amountDue = $paymentStatus['amount_due'];
+        $availableRiders = DeliveryRider::where('status', 'active')->get();
 
-        return theme_view('orders.show')->with(compact('order'));
+        return theme_view('orders.show')->with(compact('order', 'availableRiders'));
     }
 
 
@@ -117,6 +119,8 @@ class OrderController extends Controller
         $delivery_address = $cart[$orderCartId]['order_info']['delivery_address'] ?? null;
         $delivery_rider_id = $cart[$orderCartId]['order_info']['delivery_rider_id'] ?? null;
         $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ?? null;
+        $delivery_fee = $cart[$orderCartId]['order_info']['delivery_fee'] ?? null;
+        $total_amount += $delivery_fee;
 
         $request->merge([
             'total_amount' => $total_amount,
@@ -127,6 +131,7 @@ class OrderController extends Controller
             'delivery_address' => $delivery_address,
             'delivery_rider_id' => $delivery_rider_id,
             'delivery_area_id' => $delivery_area_id,
+            'delivery_fee' => $delivery_fee,
             'created_by' => auth()->id(),
             'outlet_id' => auth()->user()->outlet_id,
         ]);
@@ -135,26 +140,11 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
-            // Retrieve the restaurant order details from the request
-            // $orderData = $request->only([
-            //     'outlet_id',
-            //     'customer_id',
-            //     'order_date',
-            //     'status',
-            //     'amount',
-            //     'tax_rate',
-            //     'tax_amount',
-            //     'discount_rate',
-            //     'discount_type',
-            //     'discount_amount',
-            //     'total_amount',
-            //     'created_by'
-            // ]);
+
             $orderData = $request->all();
 
             // Create the order
             $order = Order::create($orderData);
-            //$order->update(['sub_total' => $sub_total]);
 
             // Retrieve the items from the cart order
             $items = $cart[$orderCartId]['items'];
@@ -349,5 +339,28 @@ class OrderController extends Controller
         }
 
         return redirect('orders')->with('success', 'Deleted successfully');
+    }
+
+    public function assignRider(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'rider_id' => 'required|exists:delivery_riders,id',
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+        $order->delivery_rider_id = $request->rider_id;
+        $order->save();
+
+        // Reload the order with the new rider relationship
+        $order->load('deliveryRider');
+
+        // Return updated partial view
+        $html = theme_view('orders.partials.order-rider-section', [
+            'order' => $order,
+            'availableRiders' => DeliveryRider::where('status', 'active')->get()
+        ])->render();
+
+        return response()->json(['html' => $html]);
     }
 }

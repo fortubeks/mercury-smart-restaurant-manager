@@ -31,12 +31,12 @@
                                 <td><span class="text-danger">{{ formatCurrency($outgoingPayment->amount) }}</span></td>
                                 <td>
                                     <div class="d-flex align-items-center order-actions">
-                                        @if($outgoingPayment->payable instanceof \App\Models\ExpensePayment && $outgoingPayment->payable->expense)
-                                        <a href="{{route('expenses.show',$outgoingPayment->payable->expense->id)}}" class="me-3">
+                                        @if($outgoingPayment->payable instanceof \App\Models\Expense)
+                                        <a href="{{route('expenses.show',$outgoingPayment->payable->id)}}" class="me-3">
                                             <i class='bx bx-show'></i>
                                         </a>
-                                        @elseif($outgoingPayment->payable instanceof \App\Models\PurchasePayment && $outgoingPayment->payable->purchase)
-                                        <a href="{{route('purchases.show',$outgoingPayment->payable->purchase->id)}}" class="me-3">
+                                        @elseif($outgoingPayment->payable instanceof \App\Models\Purchase)
+                                        <a href="{{route('purchases.show',$outgoingPayment->payable->id)}}" class="me-3">
                                             <i class='bx bx-show'></i>
                                         </a>
                                         @else

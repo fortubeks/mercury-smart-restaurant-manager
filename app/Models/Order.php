@@ -24,7 +24,8 @@ class Order extends Model
         'notes',
         'delivery_rider_id',
         'delivery_area_id',
-        'delivery_address'
+        'delivery_address',
+        'delivery_fee',
     ];
 
     protected static function boot()

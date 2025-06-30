@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MenuItemsExport;
+use App\Imports\MenuItemImport;
+use App\Imports\MenuItemUpdateImport;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\OutletStoreItem;
 use App\Services\MenuItemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MenuItemController extends Controller
 {
@@ -166,5 +170,90 @@ class MenuItemController extends Controller
         $item->components()->sync($syncData);
 
         return $item;
+    }
+
+    public function showMappingForm()
+    {
+        $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
+        $outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
+        return theme_view('menu-items.mapping-form')->with([
+            'menuItems' => $menuItems,
+            'outletStoreItems' => $outletStoreItems,
+            'currentOutlet' => outlet(),
+        ]);
+    }
+
+    public function mapMenuItems(Request $request)
+    {
+        $request->validate([
+            'mappings' => 'required|array',
+            'store_items' => 'array',
+            'store_items.*.quantity_used' => 'nullable|numeric|min:0',
+        ]);
+
+        foreach ($request->input('mappings', []) as $menuItemId => $outletStoreItemId) {
+            $menuItem = MenuItem::find($menuItemId);
+            $quantityUsed = $request->input("store_items.$menuItemId.quantity_used", 0);
+
+            if (!$menuItem || !$outletStoreItemId) continue;
+
+            // Attach or update the pivot table
+            $menuItem->outletStoreItems()->syncWithoutDetaching([
+                $outletStoreItemId => ['quantity_used' => $quantityUsed]
+            ]);
+        }
+
+        return redirect()->route('menu-items.mapping-form')->with('success_message', 'Menu item mapping updated successfully.');
+    }
+
+    public function viewImportItemsForm()
+    {
+        //return form
+        return theme_view('menu-items.import-form');
+    }
+
+    public function downloadSampleExcel()
+    {
+        $file = storage_path('sample-import-menu-items.csv'); // Replace 'sample.xlsx' with the path to your sample Excel file
+        $headers = [
+            'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+
+        return response()->download($file, 'sample-import-menu-items.csv', $headers);
+    }
+
+    public function downloadExistingMenuItems()
+    {
+        return Excel::download(new MenuItemsExport, 'menu_items.xlsx');
+    }
+
+    public function importItems(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        $file = $request->file('file');
+
+        $import = new MenuItemImport();
+        Excel::import($import, $file);
+
+        $importedItemCount = $import->importedItemCount;
+        return redirect('menu-items')->with('success_message', $importedItemCount . ' Items imported successfully');
+    }
+
+    public function importItemsByUpdate(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv'
+        ]);
+
+        $file = $request->file('file');
+
+        $import = new MenuItemUpdateImport();
+        Excel::import($import, $file);
+
+        $importedItemCount = $import->importedItemCount;
+        return redirect('menu-items')->with('success_message', $importedItemCount . ' Items imported successfully');
     }
 }

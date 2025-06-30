@@ -47,16 +47,8 @@ class MenuItemService
             }
 
             // Sync outlet store items
-            $storeItems = $request->input('store_items', []);
-            $syncData = [];
+            $syncData = $this->getSyncDataForOutletStoreItems($request);
 
-            foreach ($storeItems as $outletStoreItemId => $values) {
-                if (isset($values['checked']) && isset($values['quantity_used'])) {
-                    $syncData[$outletStoreItemId] = [
-                        'quantity_used' => $values['quantity_used']
-                    ];
-                }
-            }
             $item->outletStoreItems()->sync($syncData);
 
             // Sync combo items
@@ -80,5 +72,19 @@ class MenuItemService
             DB::rollBack();
             return null;
         }
+    }
+
+    public function getSyncDataForOutletStoreItems($request)
+    {
+        $syncData = [];
+        $storeItems = $request->input('store_items', []);
+        foreach ($storeItems as $outletStoreItemId => $values) {
+            if (isset($values['checked']) && isset($values['quantity_used'])) {
+                $syncData[$outletStoreItemId] = [
+                    'quantity_used' => $values['quantity_used']
+                ];
+            }
+        }
+        return $syncData;
     }
 }

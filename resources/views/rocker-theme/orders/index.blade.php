@@ -135,7 +135,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     <div class="modal fade" id="deleteCartModal" tabindex="-1" aria-labelledby="deleteCartModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

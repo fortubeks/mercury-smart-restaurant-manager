@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\StoreItem;
 use App\Models\StoreItemCategory;
+use App\Services\PurchaseStoreService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStartRow;
@@ -15,9 +16,10 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
     public $importedItemCount = 0;
     public $errors = [];
 
-    public function __construct()
+    public function __construct($store_id = null)
     {
-        $this->store_id = auth()->user()->userAccount->restaurant->defaultStore->id;
+        // If store_id is provided, use it; otherwise, set it to the default store ID
+        $this->store_id = $store_id ?? auth()->user()->userAccount->restaurant->defaultStore->id;
     }
     /**
      * @param array $row
@@ -37,7 +39,6 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
             return null; // Skip this row
         }
 
-        //$item_category_id = getItemCategoryId($row[2]);
         $category = StoreItemCategory::firstOrCreate([
             'restaurant_id' => restaurantId(),
             'name' => ucfirst(strtolower($row[2]))
@@ -45,19 +46,52 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
         $code = generateUniqueItemCode();
         $this->importedItemCount++;
 
-        return new StoreItem([
+        $storeItem = new StoreItem([
             'name' => $row[0],
             'description' => $row[1],
-            'store_id' => $this->store_id,
             'item_category_id' => $category->id,
             'code' => $code,
             'unit_measurement' => $row[3],
-            'qty' => $row[4],
             'for_sale' => $row[5],
             'low_stock_alert' => $row[6],
             'cost_price' => $row[7],
             'selling_price' => $row[8],
         ]);
+
+        $storeItem->save(); // 🔑 Save first to generate an ID
+
+        //sync the store item with the store
+        $storeItem->stores()->syncWithoutDetaching([
+            $this->store_id => [
+                'qty' => $row[4] ?? 0, // Default to 0
+                'unit_cost' => $row[7] ?? 0, // Default to 0
+                'batch_number' => $row[9] ?? null, // Optional batch number
+                'expiry_date' => $row[10] ?? null, // Optional expiry date
+            ]
+        ]);
+
+        //if qty is more than 0 create new purchase record
+        if ((float) $row[4] > 0) {
+            (new PurchaseStoreService)->create([
+                'store_id' => $storeItem->store_id,
+                'restaurant_id' => restaurantId(),
+                'purchase_date' => now()->toDateString(),
+                'sub_total' => 0,
+                'total_amount' => 0,
+                'items' => [[
+                    'store_item_id' => $storeItem->id,
+                    'qty' => $storeItem->qty,
+                    'received' => $storeItem->qty,
+                    'rate' => 0,
+                    'sub_total' => 0 * $storeItem->qty,
+                    'total_amount' => 0 * $storeItem->qty,
+                    'unit_qty' => 0,
+                    'description' => 'Initial stock on creation'
+                ]]
+            ]);
+        }
+
+        return $storeItem;
     }
 
     public function registerEvents(): array

@@ -25,7 +25,7 @@ class RestaurantSetupService
 
             Outlet::create([
                 'restaurant_id' => $restaurant->id,
-                'name' => 'Main Outlet',
+                'name' => 'Main Restaurant Outlet',
                 'is_default' => true,
                 'is_sales_outlet' => true,
             ]);

@@ -2,12 +2,12 @@
 
 namespace App\Exports;
 
-use App\Models\RestaurantItem;
+use App\Models\MenuItem;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class RestaurantMenuItemsExport implements FromCollection, WithHeadings
+class MenuItemsExport implements FromCollection, WithHeadings
 {
     /**
      * Get the collection of menu items.
@@ -16,7 +16,7 @@ class RestaurantMenuItemsExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        return hotel()->defaultRestaurant()->restaurantItems()->get();
+        return MenuItem::where('outlet_id', outlet()->id)->get();
     }
 
     /**
@@ -26,7 +26,7 @@ class RestaurantMenuItemsExport implements FromCollection, WithHeadings
      */
     public function headings(): array
     {
-        $columns = Schema::getColumnListing((new RestaurantItem)->getTable());
+        $columns = Schema::getColumnListing((new MenuItem)->getTable());
         $columns[] = 'quantity';
         return $columns;
     }

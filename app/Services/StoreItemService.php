@@ -45,8 +45,6 @@ class StoreItemService
         foreach ($storeItem->outletStoreItems as $outletStoreItem) {
             $menuItems = $menuItems->merge($outletStoreItem->menuItems);
         }
-        //$menuItems = $menuItems->pluck('id')->unique();
-        //dd($menuItems);
 
         if ($menuItems->isEmpty()) {
             return [
@@ -55,13 +53,14 @@ class StoreItemService
             ];
         }
 
-        $query = MenuItemOrder::whereIn('menu_item_id', $menuItems)
+        $menuItemIds = $menuItems->pluck('id');
+
+        $query = MenuItemOrder::whereIn('menu_item_id', $menuItemIds)
             ->whereBetween('created_at', [$startDate, $endDate]);
-        $revenue = $query->sum('amount');
-        $qty = $query->sum('qty');
+
         return [
-            'revenue' => $revenue,
-            'qty' => $qty,
+            'revenue' => $query->sum('total_amount'),
+            'qty' => $query->sum('qty'),
         ];
     }
 

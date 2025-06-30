@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Customers\CustomerStoreRequest;
 use App\Models\Customer;
+use App\Services\CustomerManagementService;
+use App\Services\RestaurantSalesService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -44,10 +47,43 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function show(Request $request, $id)
     {
-        return theme_view('customers.form', [
-            'customer' => $customer
+        // Get the customer or fail if not found
+        $customer = Customer::findOrFail($id);
+
+        // Parse the optional date range from request
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Build the base query
+        $ordersQuery = $customer->orders();
+
+        // Apply date filtering if dates are provided
+        if ($startDate && $endDate) {
+            $ordersQuery->whereBetween('order_date', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        // Get the filtered orders
+        $orders = $ordersQuery->get();
+
+        // Use the service class to calculate total sales
+        $sales = app(RestaurantSalesService::class)->getRestaurantSales($orders);
+
+        //use the service class to get customer metrics
+        $metrics =  app(CustomerManagementService::class)->getCustomerMetrics($customer);
+
+        // Return the view with all data
+        return theme_view('customers.show', [
+            'customer' => $customer,
+            'orders' => $orders,
+            'sales' => $sales,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'metrics' => $metrics
         ]);
     }
 

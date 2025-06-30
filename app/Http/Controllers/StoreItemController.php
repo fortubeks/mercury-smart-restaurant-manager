@@ -11,10 +11,12 @@ use App\Models\Outlet;
 use App\Models\OutletItemMigration;
 use App\Models\OutletItemMigrationDetails;
 use App\Models\OutletStoreItem;
+use App\Models\Store;
 use App\Models\StoreIssue;
 use App\Models\StoreIssueStoreItem;
 use App\Models\StoreItem;
 use App\Models\StoreItemActivity;
+use App\Models\StoreStoreItem;
 use App\Services\PurchaseStoreService;
 use App\Services\StoreItemService;
 use Illuminate\Http\Request;
@@ -24,10 +26,18 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StoreItemController extends Controller
 {
-    public function index(StoreItem $model)
+    public function index(Request $request)
     {
+        $storeId = $request->input('store_id');
+
+        $baseQuery = StoreItem::query();
+
+        if (!empty($storeId)) {
+            $baseQuery->where('store_id', $storeId);
+        }
+        $storeItems = $baseQuery->get();
         return theme_view('store-items.index', [
-            'storeItems' => $model->where('store_id', restaurant()->defaultStore->id)->get(),
+            'storeItems' => $storeItems,
         ]);
     }
 
@@ -57,8 +67,10 @@ class StoreItemController extends Controller
 
         $storeItem = StoreItem::create($data);
 
-        //if qty is more than 0 create new purchase record
+        //sync the store item with store_store_items table
+        $storeItem->stores()->syncWithoutDetaching($storeItem->store_id);
 
+        //if qty is more than 0 create new purchase record
         if ($data['qty'] > 0) {
             (new PurchaseStoreService)->create([
                 'store_id' => $data['store_id'],
@@ -110,7 +122,8 @@ class StoreItemController extends Controller
             ->whereBetween('activity_date', [$startDate, $endDate])
             ->orderByDesc('created_at')
             ->get();
-        $stockBalance = count($dailyStats) ? $dailyStats[array_key_last($dailyStats)]['balance'] : 0;
+        //$stockBalance = count($dailyStats) ? $dailyStats[array_key_last($dailyStats)]['balance'] : 0;
+        $stockBalance = $storeItem->total_qty;
 
         return theme_view('store-items.show', [
             'store_item' => $storeItem,
@@ -205,7 +218,8 @@ class StoreItemController extends Controller
     public function viewImportItemsForm()
     {
         //return form
-        return theme_view('store-items.import');
+        $stores  = restaurant()->stores;
+        return theme_view('store-items.import')->with(compact('stores'));
     }
 
     public function downloadSampleExcel()
@@ -221,12 +235,13 @@ class StoreItemController extends Controller
     public function importItems(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,csv'
+            'file' => 'required|mimes:xlsx,csv',
+            'store_id' => 'required|exists:stores,id'
         ]);
 
         $file = $request->file('file');
 
-        $import = new StoreItemImport();
+        $import = new StoreItemImport($request->store_id);
         Excel::import($import, $file);
 
         $importedItemCount = $import->importedItemCount;
@@ -263,25 +278,31 @@ class StoreItemController extends Controller
 
     public function viewGiveItemsForm(Request $request)
     {
-        $type = $request->type;
-        $store_id = auth()->user()->restaurant->defaultStore->id;
-        if ($type == 'drinks') {
-            //get items in store with drinks category
-            $items = StoreItem::where('item_category_id', 2)->where('store_id', $store_id)
-                ->where('for_sale', true)->get();
-            return theme_view('store-items.give-drinks')->with('items', $items);
+        // Get the category ID from request or default
+        $categoryId = $request->category_id ?? null;
+
+        // Get the store ID from request or default
+        $storeId = $request->store_id ?? restaurant()->defaultStore->id;
+
+        // Build query conditionally
+        $query = StoreItem::query();
+
+        // Filter by category if provided
+        if ($categoryId) {
+            $query->where('item_category_id', $categoryId);
         }
-        if ($type == 'food') {
-            //get items in store with drinks category
-            $storeItems = StoreItem::where('store_id', $store_id)->get();
-            return theme_view('store-items.give-food')->with('storeItems', $storeItems);
-        }
-        if ($type == 'hk') {
-            //get items in store with drinks category
-            $items = StoreItem::where('item_category_id', 3)->where('store_id', $store_id)->get();
-            return theme_view('store-items.give-hk')->with('items', $items);
-        }
-        return theme_view('store-items.give');
+
+        // Filter items that exist in store_store_items for given store
+        $query->whereHas('stores', function ($q) use ($storeId) {
+            $q->where('store_store_items.store_id', $storeId);
+        });
+
+        // Eager load pivot data
+        $storeItems = $query->with(['stores' => function ($q) use ($storeId) {
+            $q->where('store_store_items.store_id', $storeId);
+        }])->get();
+
+        return theme_view('store-items.give')->with('storeItems', $storeItems);
     }
 
     public function giveItems(Request $request)
@@ -289,7 +310,8 @@ class StoreItemController extends Controller
         // Validate the request data
         $request->validate([
             'recipient' => 'required|string|max:255',
-            'outlet_id' => 'required',
+            'outlet_id' => 'required|exists:outlets,id',
+            'store_id' => 'required|exists:stores,id'
         ]);
 
         // Retrieve the recipient's name from the request
@@ -302,7 +324,11 @@ class StoreItemController extends Controller
             return $value !== null;
         });
 
-        $store_id = auth()->user()->restaurant->defaultStore->id;
+        $store_id = $request->input('store_id');
+
+        $type = $request->input('category_id')
+            ? \App\Models\StoreItemCategory::find($request->input('category_id'))?->name ?? 'Other'
+            : 'Other';
 
         // Start a database transaction
         DB::beginTransaction();
@@ -314,14 +340,18 @@ class StoreItemController extends Controller
                 'outlet_id' => $request->outlet_id,
                 'user_id' => auth()->id(),
                 'store_id' => $store_id,
-                'type' => $request->type
+                'type' => $type
             ]);
             // Loop through the quantities and update the items accordingly
             foreach ($quantities as $itemId => $quantity) {
                 $store_item = StoreItem::findOrFail($itemId); // Find the item by its ID
+                $store_store_item = StoreStoreItem::where('store_id', $store_id)->where('store_item_id', $itemId)->first(); // Find the item by its ID
+
+                //get previous store qty
+                $previous_qty = $store_store_item->qty;
 
                 // Check if there are enough items in stock
-                if ($store_item->qty < $quantity) {
+                if ($previous_qty < $quantity) {
                     // Rollback the transaction if there's not enough stock
                     DB::rollBack();
 
@@ -329,13 +359,10 @@ class StoreItemController extends Controller
                     return redirect()->back()->with('error', 'Not enough ' . $store_item->name . ' in stock.');
                 }
 
-                //get previous store qty
-                $previous_qty = $store_item->qty;
+                $new_qty = $previous_qty - $quantity;
 
-                // Update the quantity of the store item
-                $store_item->qty -= $quantity;
-
-                $store_item->save();
+                // Update the quantity of the store store item
+                $store_item->stores()->updateExistingPivot($store_id, ['qty' => $new_qty]);
 
                 // Create a transaction record for giving out the item
                 StoreIssueStoreItem::create([
@@ -369,7 +396,7 @@ class StoreItemController extends Controller
                     'store_issue_id' => $store_issue->id,
                     'previous_qty' => $previous_qty,
                     'activity_date' => $store_issue->created_at,
-                    'current_qty' => $store_item->qty,
+                    'current_qty' => $new_qty,
                     'description' => 'Give out'
                 ]);
             }
@@ -384,7 +411,7 @@ class StoreItemController extends Controller
             DB::rollBack();
 
             // Log the error message
-            Log::error($e->getMessage());
+            Log::error($e);
 
             // Redirect back with error message
             return redirect()->back()->with('error_message', 'Failed to give out items. ' . $e->getMessage());
@@ -394,122 +421,6 @@ class StoreItemController extends Controller
     public function export()
     {
         return Excel::download(new StoreItemsExport, 'store_items.xlsx');
-    }
-
-    public function viewMigrateItemsForm(Request $request)
-    {
-        $type = $request->type;
-        $store_id = auth()->user()->restaurant->store->id;
-
-        if ($type == 'drinks' && isset($request->outlet_a) && isset($request->outlet_b)) {
-            $outletA = Outlet::findorFail($request->outlet_a);
-            $outletB = Outlet::findorFail($request->outlet_b);
-            // Step 1: Get the duplicate store_item_ids
-            $duplicateStoreItemIds = OutletStoreItem::whereIn('outlet_id', [$outletA->id, $outletB->id])
-                ->select('store_item_id')
-                ->groupBy('store_item_id')
-                ->havingRaw('COUNT(*) > 1')
-                ->pluck('store_item_id');
-
-            // Step 2: Join and filter results for outlet_id = 5
-            $outletAItems = OutletStoreItem::join('store_items', 'outlet_store_items.store_item_id', '=', 'store_items.id')
-                ->whereIn('outlet_store_items.store_item_id', $duplicateStoreItemIds)
-                ->where('outlet_store_items.outlet_id', $outletA->id)
-                ->where('store_items.store_id', $store_id)
-                ->select('outlet_store_items.*', 'store_items.store_id')
-                ->get();
-
-            // Step 3: Join and filter results for outlet_id = 6
-            $outletBItems = OutletStoreItem::join('store_items', 'outlet_store_items.store_item_id', '=', 'store_items.id')
-                ->whereIn('outlet_store_items.store_item_id', $duplicateStoreItemIds)
-                ->where('outlet_store_items.outlet_id', $outletB->id)
-                ->where('store_items.store_id', $store_id)
-                ->select('outlet_store_items.*', 'store_items.store_id')
-                ->get()
-                ->keyBy('store_item_id'); // Group by store_item_id
-            //dd(compact('outletAItems', 'outletBItems'));
-            return theme_view('store-items.migrate.step-2')->with(compact('outletAItems', 'outletBItems', 'outletA', 'outletB'));
-        }
-
-        $outlets = restaurant()->outlets()->where('type', 'bar')->get();
-
-        return theme_view('store-items.migrate.step-1')->with(compact('outlets'));
-    }
-
-    public function migrateItems(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'outletA' => 'required',
-            'outletB' => 'required',
-        ]);
-
-        // Retrieve the quantities of items going out from the request
-        $quantities = $request->input('quantities');
-        // Filter out entries with null values
-        $quantities = array_filter($quantities, function ($value) {
-            return $value !== null;
-        });
-
-        // Start a database transaction
-        DB::beginTransaction();
-
-        try {
-            $outletItemMigration = OutletItemMigration::create([
-                'note' => $request->note,
-                'from_outlet_id' => $request->outletA,
-                'to_outlet_id' => $request->outletB,
-                'user_id' => auth()->id(),
-                'restaurant_id' => restaurantId(),
-            ]);
-            // Loop through the quantities and update the items accordingly
-            foreach ($quantities as $itemId => $quantity) {
-                $outletA_item = OutletStoreItem::findOrFail($itemId); // Find the item by its ID
-                $storeItem = $outletA_item->storeItem;
-                $outletB_item = OutletStoreItem::where('outlet_id', $request->outletB)
-                    ->where('store_item_id', $storeItem->id)->first();
-
-                // Check if there are enough items in stock
-                if ($outletA_item->qty < $quantity) {
-                    // Rollback the transaction if there's not enough stock
-                    DB::rollBack();
-
-                    // Redirect back with error message
-                    return redirect()->back()->with('error', 'Not enough ' . $outletA_item->storeItem->name . ' in stock.');
-                }
-
-                // Update the quantity of the store item
-                $outletA_item->qty -= $quantity;
-                $outletB_item->qty += $quantity;
-
-                $outletA_item->save();
-                $outletB_item->save();
-
-                //save in StoreItem activity table
-                OutletItemMigrationDetails::create([
-                    'store_item_id' => $outletA_item->storeItem->id,
-                    'qty' => $quantity,
-                    'outlet_item_migration_id' => $outletItemMigration->id,
-                    'outletA_balance' => $outletA_item->qty,
-                    'outletB_balance' => $outletB_item->qty
-                ]);
-            }
-
-            // If all operations succeed, commit the transaction
-            DB::commit();
-
-            // Redirect back with success message
-            return redirect()->back()->with('success_message', 'Items successfully transfered out to ' . $outletB_item->outlet->name);
-        } catch (\Exception $e) {
-            // If an exception occurs, rollback the transaction and handle the error
-            DB::rollBack();
-
-            // Log the error message
-            Log::error($e->getMessage());
-
-            // Redirect back with error message
-            return redirect()->back()->with('error_message', 'Failed to transfer out items. Please try again later.');
-        }
     }
 
     public function reportDamagedItem(Request $request)
@@ -574,7 +485,6 @@ class StoreItemController extends Controller
             DB::rollBack();
             logger($ex);
         }
-
 
         return back()->with('success', 'Damaged item reported successfully.');
     }
