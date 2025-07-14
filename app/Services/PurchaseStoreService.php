@@ -32,11 +32,12 @@ class PurchaseStoreService
             foreach ($data['items'] as $item) {
                 $storeItem = StoreItem::findOrFail($item['store_item_id']);
 
-                $previous_qty = $storeItem->getQtyForStore($data['store_id']);
+                $previousQty = $storeItem->getQtyForStore($data['store_id']);
+                $currentQty = $previousQty;
                 // Then sync the pivot table
                 $storeItem->stores()->syncWithoutDetaching([
                     $data['store_id'] => [
-                        'qty' => $item['unit_qty'],
+                        'qty' => $item['qty'],
                         'unit_cost' => $item['rate'],
                         'batch_reference' => $item['batch_reference'] ?? null,
                         'expiry_date' => $item['expiry_date'] ?? null,
@@ -62,9 +63,9 @@ class PurchaseStoreService
                     'store_item_id' => $item['store_item_id'],
                     'store_id' => $data['store_id'],
                     'qty' => $item['qty'],
-                    'previous_qty' => $previous_qty,
+                    'previous_qty' => $previousQty,
                     'activity_date' => $data['purchase_date'],
-                    'current_qty' => $storeItem->qty,
+                    'current_qty' => $currentQty,
                     'description' => $item['description'] ?? 'Purchase',
                 ]);
 
