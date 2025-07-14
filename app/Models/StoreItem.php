@@ -57,7 +57,7 @@ class StoreItem extends Model
     public function stores()
     {
         return $this->belongsToMany(Store::class, 'store_store_items')
-            ->withPivot('qty', 'unit_cost', 'batch_number', 'expiry_date')
+            ->withPivot('qty', 'unit_cost', 'batch_reference', 'expiry_date')
             ->withTimestamps();
     }
 
@@ -92,7 +92,7 @@ class StoreItem extends Model
 
     public function getOpeningStock($startDate)
     {
-        // Assuming you have a relationship to track stock movements, 
+        // Assuming you have a relationship to track stock movements,
         // for example, activities model with 'quantity' field.
         // You need to sum up all stock movements until the given start date.
 

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('store_item_id')->constrained('store_items')->onDelete('cascade');
             $table->decimal('qty', 10, 2)->default(0);
             $table->decimal('unit_cost', 10, 2)->nullable();
-            $table->string('batch_number')->nullable();
+            $table->string('batch_reference')->nullable();
             $table->date('expiry_date')->nullable();
             $table->timestamps();
 

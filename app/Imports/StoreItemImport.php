@@ -65,7 +65,7 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
             $this->store_id => [
                 'qty' => $row[4] ?? 0, // Default to 0
                 'unit_cost' => $row[7] ?? 0, // Default to 0
-                'batch_number' => $row[9] ?? null, // Optional batch number
+                'batch_reference' => $row[9] ?? null, // Optional batch number
                 'expiry_date' => $row[10] ?? null, // Optional expiry date
             ]
         ]);
