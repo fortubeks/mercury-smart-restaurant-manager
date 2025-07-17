@@ -106,4 +106,14 @@ class MenuItem extends Model
             ->withPivot(['qty', 'amount', 'tax_rate', 'tax_amount', 'discount_rate', 'discount_amount', 'total_amount'])
             ->withTimestamps();
     }
+
+    public function images()
+    {
+        return $this->hasMany(MenuItemImage::class);
+    }
+
+    public function featuredImage()
+    {
+        return $this->hasOne(MenuItemImage::class)->where('is_featured', true);
+    }
 }

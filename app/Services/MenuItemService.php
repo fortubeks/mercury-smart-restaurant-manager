@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class MenuItemService
 {
+    protected $mediaUploadService;
+
+    public function __construct(MediaUploadService $_mediaUploadService)
+    {
+        $this->mediaUploadService = $_mediaUploadService;
+    }
+
     public function save(Request $request): ?MenuItem
     {
         return $this->saveOrUpdate($request);
@@ -27,11 +34,6 @@ class MenuItemService
 
             $requestData = [];
 
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('menu-items/images', 'public');
-                $requestData['image'] = $imagePath;
-            }
-
             $requestData['is_available'] = $request->has('is_available') ? 1 : 0;
             $requestData['is_combo'] = $request->has('is_combo') ? 1 : 0;
 
@@ -40,10 +42,12 @@ class MenuItemService
 
             $request->merge(['menu_category_id' => $categoryId]);
 
+            $data = array_merge($request->except('image'), $requestData);
+
             if ($item) {
-                $item->update(array_merge($request->all(), $requestData));
+                $item->update($data);
             } else {
-                $item = MenuItem::create(array_merge($request->all(), $requestData));
+                $item = MenuItem::create($data);
             }
 
             // Sync outlet store items
@@ -63,6 +67,15 @@ class MenuItemService
                 }
             }
             $item->components()->sync($syncData);
+
+            if ($request->hasFile('image')) {
+                //$imagePath = $request->file('image')->store('menu-items/images', 'public');
+                $uploadedImagePath = $this->mediaUploadService->upload($request->file('image'), 'menu-items/images', 'image');
+                $item->images()->create([
+                    'image_path' => $uploadedImagePath,
+                    'is_featured' => true
+                ]);
+            }
 
             DB::commit();
 

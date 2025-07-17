@@ -122,6 +122,11 @@
                             <h6 class="card-header white">Item Image</h6>
                             <div class="card-body">
                                 <div class="mb-3">
+                                    @if($menuItem->featuredImage)
+                                    <img src="{{ asset($menuItem->featuredImage->image_path) }}" alt="Featured Image" style="max-width: 100%; height: auto;">
+                                    @else
+                                    <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No Image" style="max-width: 100%; height: auto;">
+                                    @endif
                                     <input type="file" name="image" id="image"
                                         class="form-control @error('image') is-invalid @enderror">
                                     <label for="image" class="label">Select Image</label>

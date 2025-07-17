@@ -1,5 +1,13 @@
 @extends('rocker-theme.layouts.app')
 <style>
+    .sidebar-wrapper {
+        width: 70px !important;
+    }
+
+    .page-wrapper {
+        margin-left: 65px !important;
+    }
+
     .cart-item {
         display: flex;
         align-items: flex-start;
@@ -106,13 +114,13 @@
                                 <div class="d-flex flex-wrap gap-2 menu-items">
                                     @foreach ($menuItems as $item)
                                     <button type="button" class="btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center"
-                                        style="width: 100px; height: 120px;" data-item-id="{{ $item->id }}">
+                                        style="width: 200px; height: 180px;" data-item-id="{{ $item->id }}">
 
-                                        @if ($item->image)
-                                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
-                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" class="mb-1">
+                                        @if ($item->featuredImage)
+                                        <img src="{{ asset($item->featuredImage->image_path) }}" alt="{{ $item->name }}"
+                                            style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px;" class="mb-1">
                                         @else
-                                        <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
+                                        <div class="mb-1" style="width: 100px; height: 100px; background-color: #e9ecef; border-radius: 6px;"></div>
                                         @endif
 
                                         <small class="text-wrap">{{ $item->name }} [{{ formatCurrency($item->price) }}] ({{ $item->quantity }})</small>
@@ -125,13 +133,13 @@
                                 <div class="d-flex flex-wrap gap-2 menu-items">
                                     @foreach ($category->menuItems as $item)
                                     <button type="button" class="btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center"
-                                        style="width: 100px; height: 120px;" data-item-id="{{ $item->id }}">
+                                        style="width: 200px; height: 180px;" data-item-id="{{ $item->id }}">
 
-                                        @if ($item->image)
-                                        <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->name }}"
-                                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" class="mb-1">
+                                        @if ($item->featuredImage)
+                                        <img src="{{ asset($item->featuredImage->image_path) }}" alt="{{ $item->name }}"
+                                            style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px;" class="mb-1">
                                         @else
-                                        <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
+                                        <div class="mb-1" style="width: 100px; height: 100px; background-color: #e9ecef; border-radius: 6px;"></div>
                                         @endif
 
                                         <small class="text-wrap">{{ $item->name }}[{{ formatCurrency($item->price) }}] ({{ $item->quantity }})</small>
@@ -406,23 +414,23 @@
                         const button = $('<button>', {
                             type: 'button',
                             class: 'btn btn-outline-primary p-2 add-to-cart d-flex flex-column align-items-center text-center',
-                            style: 'width: 100px; height: 120px;',
+                            style: 'width: 200px; height: 180px;',
                             'data-item-id': item.id
                         });
 
                         // Image or placeholder
-                        if (item.image) {
+                        if (item.featuredImage) {
                             const img = $('<img>', {
-                                src: '/storage/' + item.image,
+                                src: `/storage/${item.featuredImage.image_path}`,
                                 alt: item.name,
-                                style: 'width: 50px; height: 50px; object-fit: cover; border-radius: 6px;',
+                                style: 'width: 100px; height: 100px; object-fit: cover; border-radius: 6px;',
                                 class: 'mb-1'
                             });
                             button.append(img);
                         } else {
                             const placeholder = $('<div>', {
                                 class: 'mb-1',
-                                style: 'width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;'
+                                style: 'width: 100px; height: 100px; background-color: #e9ecef; border-radius: 6px;'
                             });
                             button.append(placeholder);
                         }

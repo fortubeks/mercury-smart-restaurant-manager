@@ -43,12 +43,12 @@
 
                     <div class="col-md-3 mb-3">
                         <label for="phone" class="form-label">Primary Phone</label>
-                        <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', $customer->phone ?? '') }}" placeholder="e.g. 8012345678">
+                        <input type="number" min="7" class="form-control" id="phone" name="phone" value="{{ old('phone', $customer->phone ?? '') }}" placeholder="e.g. 8012345678">
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label for="other_phone" class="form-label">Other Phone</label>
-                        <input type="text" class="form-control" id="other_phone" name="other_phone" value="{{ old('other_phone', $customer->other_phone ?? '') }}" placeholder="Optional">
+                        <input type="number" min="7" class="form-control" id="other_phone" name="other_phone" value="{{ old('other_phone', $customer->other_phone ?? '') }}" placeholder="Optional">
                     </div>
 
                     <div class="col-md-3 mb-3">
