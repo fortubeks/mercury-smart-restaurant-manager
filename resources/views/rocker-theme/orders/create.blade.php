@@ -115,7 +115,7 @@
                                         <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
                                         @endif
 
-                                        <small class="text-wrap">{{ $item->name }} ({{ $item->quantity }})</small>
+                                        <small class="text-wrap">{{ $item->name }} [{{ formatCurrency($item->price) }}] ({{ $item->quantity }})</small>
                                     </button>
                                     @endforeach
                                 </div>
@@ -134,7 +134,7 @@
                                         <div class="mb-1" style="width: 50px; height: 50px; background-color: #e9ecef; border-radius: 6px;"></div>
                                         @endif
 
-                                        <small class="text-wrap">{{ $item->name }} ({{ $item->quantity }})</small>
+                                        <small class="text-wrap">{{ $item->name }}[{{ formatCurrency($item->price) }}] ({{ $item->quantity }})</small>
                                     </button>
                                     @endforeach
                                 </div>

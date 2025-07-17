@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('store_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('restaurant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('item_category_id')->nullable()->constrained('store_item_categories')->nullOnDelete(); //eg food, drinks, maintenance
             $table->string('name');
             $table->string('code')->unique();

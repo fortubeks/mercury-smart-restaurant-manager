@@ -145,7 +145,7 @@ function getModelList($model)
         'suppliers' => Supplier::where('restaurant_id', $restaurant_id)->get(),
         'purchases' => Purchase::where('store_id', $restaurant->store->id)->get(),
         'expense-items' => ExpenseItem::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
-        'store-items' => StoreItem::where('store_id', $restaurant->defaultStore->id)->orderBy('name')->get(),
+        'store-items' => StoreItem::where('restaurant_id', $restaurant->id)->orderBy('name')->get(),
         'room-categories' => RoomCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'purchase-categories' => PurchaseCategory::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'store-item-categories' => StoreItemCategory::where('restaurant_id', $restaurant->id)->orderBy('name')->get(),
@@ -213,7 +213,7 @@ function calculateTaxRate()
 }
 function calculateTaxAmount($amount)
 {
-    //get all active tax and then apply to the amount 
+    //get all active tax and then apply to the amount
     // Fetch all active taxes from the database
     $activeTaxes = Tax::where('restaurant_id', restaurantId())->where('is_active', true)->get();
 
