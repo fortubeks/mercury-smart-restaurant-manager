@@ -38,7 +38,7 @@
                         <td>{{ $storeItem->code }}</td>
                         <td>
                             @if($storeItem->image)
-                            <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $store_item->image) }}" alt=" Image">
+                            <img style="width: 40px;" class="img-fluid item-image" src="{{ asset('storage/' . $storeItem->image) }}" alt=" Image">
                             @endif
                         </td>
                         <td>{{ $storeItem->name }}</td>
