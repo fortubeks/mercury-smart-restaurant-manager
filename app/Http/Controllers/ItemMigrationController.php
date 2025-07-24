@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ItemMigration;
 use App\Models\ItemMigrationDetail;
 use App\Models\Outlet;
+use App\Models\OutletStoreItem;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
