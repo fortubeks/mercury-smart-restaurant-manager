@@ -8,19 +8,20 @@
         <form action="{{ route('store-item.migrate-items.post') }}" method="POST">
             @csrf
             <div class="mb-3">
-                <input type="hidden" name="from_id" value="{{$storeA->id}}">
-                <input type="hidden" name="to_id" value="{{$storeB->id}}">
+                <input type="hidden" name="from_id" value="{{ $storeA->id }}">
+                <input type="hidden" name="to_id" value="{{ $storeB->id }}">
                 <input type="hidden" name="from_type" value="store">
                 <input type="hidden" name="to_type" value="store">
             </div>
-            <table class="table table-bordered mb-0">
+
+            <table class="table table-bordered mb-0" id="migration-table">
                 <thead>
                     <tr>
-                        <th>Item Code(Store A)</th>
-                        <th>{{$storeA->name}}</th>
+                        <th>Item Code ({{ $storeA->name }})</th>
+                        <th>{{ $storeA->name }}</th>
                         <th>Quantity to Send</th>
-                        <th>{{$storeB->name}}</th>
-                        <th>Item Code(Store A)</th>
+                        <th>{{ $storeB->name }}</th>
+                        <th>Item Code ({{ $storeB->name }})</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,8 +35,11 @@
                         <td>{{ $storeAItem->code }}</td>
                         <td>{{ $storeAItem->name . ' (' . $storeAQty . ')' }}</td>
                         <td>
-                            <input type="number" class="form-control" name="quantities[{{ $storeAItem->pivot->id }}]"
-                                min="1" max="{{ $storeAQty }}">
+                            <input type="number"
+                                class="form-control"
+                                name="quantities[{{ $storeAItem->pivot->id }}]"
+                                min="1"
+                                max="{{ $storeAQty }}">
                         </td>
                         <td>{{ $storeBItem ? $storeBItem->name . ' (' . ($storeBItem->pivot->qty ?? 0) . ')' : 'N/A' }}</td>
                         <td>{{ $storeBItem ? $storeBItem->code : 'N/A' }}</td>
@@ -43,6 +47,7 @@
                     @endforeach
                 </tbody>
             </table>
+
             <div class="row mt-3 mb-3">
                 <div class="col-md-6">
                     <label for="recipient">Notes:</label><br>
@@ -57,3 +62,18 @@
 </div>
 
 @endsection
+<script>
+    window.addEventListener('load', function() {
+        $('#migration-table').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            lengthMenu: [10, 25, 50, 100],
+            columnDefs: [{
+                    orderable: false,
+                    targets: 2
+                } // disable sorting on "Quantity to Send"
+            ]
+        });
+    });
+</script>

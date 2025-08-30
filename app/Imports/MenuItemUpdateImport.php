@@ -41,6 +41,8 @@ class MenuItemUpdateImport implements ToModel, WithStartRow, WithEvents
                     'name' => $row[3],
                     'description' => $row[4] ?? null,
                     'price' => $row[5] ?? 0,
+                    'is_available' => $row[6] ?? false,
+                    'is_combo' => $row[7] ?? false,
                 ]);
             }
             $this->importedItemCount++;

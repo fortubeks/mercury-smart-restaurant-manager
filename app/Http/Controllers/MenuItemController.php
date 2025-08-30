@@ -61,7 +61,7 @@ class MenuItemController extends Controller
     {
         $menuItem = MenuItem::findOrFail($id);
         $outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
-        $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
+        $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
         return theme_view('menu-items.form')->with(['menuItems' => $menuItems, 'outletStoreItems' => $outletStoreItems, 'menuItem' => $menuItem]);
     }
 

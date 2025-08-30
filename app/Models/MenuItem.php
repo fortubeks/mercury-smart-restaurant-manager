@@ -13,7 +13,8 @@ class MenuItem extends Model
         'menu_category_id',
         'image',
         'is_available',
-        'outlet_id'
+        'outlet_id',
+        'is_combo',
     ];
 
     protected $quantity = 100;
@@ -36,7 +37,7 @@ class MenuItem extends Model
             $portion_counts = [];
 
             foreach ($this->components as $component) {
-                $stock_qty = $component->outletStoreItem->qty;
+                $stock_qty = $component->outletStoreItem->qty ?? 0;
                 $qty_needed = $component->pivot->quantity;
 
                 if ($qty_needed > 0) {

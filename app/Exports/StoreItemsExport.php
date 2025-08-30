@@ -14,7 +14,7 @@ class StoreItemsExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        return StoreItem::where('store_id', auth()->user()->userAccount->restaurant->defaultStore->id)->get();
+        return StoreItem::where('restaurant_id', auth()->user()->userAccount->restaurant->id)->get();
     }
 
     /**

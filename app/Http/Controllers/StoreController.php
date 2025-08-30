@@ -62,4 +62,16 @@ class StoreController extends Controller
 
         return redirect()->route('stores.index')->with('success_message', 'Store updated successfully.');
     }
+
+    public function destroy(Request $request, $id)
+    {
+        $store = restaurant()->stores()->findOrFail($id);
+        $store->delete();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+
+        return redirect()->route('stores.index')->with('success_message', 'Store deleted successfully.');
+    }
 }
