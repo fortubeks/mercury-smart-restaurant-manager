@@ -1,11 +1,14 @@
 @extends('rocker-theme.layouts.app')
 <style>
-    .sidebar-wrapper {
-        width: 70px !important;
-    }
+    /* Apply only on medium screens and up */
+    @media (min-width: 768px) {
+        .sidebar-wrapper {
+            width: 70px !important;
+        }
 
-    .page-wrapper {
-        margin-left: 65px !important;
+        .page-wrapper {
+            margin-left: 65px !important;
+        }
     }
 
     .cart-item {
@@ -66,10 +69,10 @@
                     </div>
                     <div style="width: 80%;">
                         <div class="row">
-                            <div class="col">
+                            <div class="col-12 col-md-8 mx-auto">
                                 <input type="text" id="searchItems" class="form-control ps-5 radius-30" placeholder="Search Items">
                             </div>
-                            <div class="col">
+                            <div class="col-12 col-md-4 mx-auto">
                                 <select id="outlet" class="form-select" data-outlet="{{ $outletId }}">
                                     @foreach (getModelList('restaurant-outlets') as $outlet)
                                     <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
@@ -82,7 +85,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-8 mx-auto">
+            <div class="col-12 col-md-8 mx-auto">
                 <div class="card">
                     <div class="card-body">
                         <ul class="nav nav-tabs nav-primary" role="tablist">
@@ -152,7 +155,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-4 mx-auto">
+            <div class="col-12 col-md-4 mx-auto">
                 <div class="card">
                     <div class="card-body p-4">
                         @if(isset($cartData) && count($cartData['items']) > 0)
