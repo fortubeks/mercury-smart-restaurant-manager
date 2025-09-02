@@ -8,10 +8,10 @@ class OutletStoreItem extends Model
 {
     protected $fillable = ['store_item_id', 'outlet_id', 'qty', 'price'];
 
-    public function menuItems()
-    {
-        return $this->belongsToMany(MenuItem::class, 'menu_item_outlet_store_items');
-    }
+    // public function menuItems()
+    // {
+    //     return $this->belongsToMany(MenuItem::class, 'menu_item_outlet_store_items');
+    // }
 
     public function storeItem()
     {

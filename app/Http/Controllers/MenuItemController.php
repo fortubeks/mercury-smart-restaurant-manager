@@ -8,6 +8,7 @@ use App\Imports\MenuItemUpdateImport;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\OutletStoreItem;
+use App\Models\StoreItem;
 use App\Services\MenuItemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,9 +61,11 @@ class MenuItemController extends Controller
     public function edit($id)
     {
         $menuItem = MenuItem::findOrFail($id);
-        $outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
-        $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
-        return theme_view('menu-items.form')->with(['menuItems' => $menuItems, 'outletStoreItems' => $outletStoreItems, 'menuItem' => $menuItem]);
+        $storeItems = StoreItem::whereHas('category', function ($query) {
+            $query->where('name', 'Food');
+        })->orderBy('name', 'asc')->get();
+        $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->orderBy('name', 'asc')->get();
+        return theme_view('menu-items.form')->with(compact('menuItems', 'storeItems', 'menuItem'));
     }
 
     public function update(Request $request, $id)
@@ -174,11 +177,16 @@ class MenuItemController extends Controller
 
     public function showMappingForm()
     {
-        $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
-        $outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
+        $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
+        //$outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
+        $storeItems = StoreItem::whereHas('category', function ($query) {
+            $query->where('name', 'Food');
+        })
+            ->where('for_sale', true)
+            ->get();
         return theme_view('menu-items.mapping-form')->with([
             'menuItems' => $menuItems,
-            'outletStoreItems' => $outletStoreItems,
+            'storeItems' => $storeItems,
             'currentOutlet' => outlet(),
         ]);
     }

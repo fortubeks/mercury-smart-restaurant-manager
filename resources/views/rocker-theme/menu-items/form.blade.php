@@ -66,35 +66,13 @@
                                 <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label for="item-description">Item description</label><br>
-                                    <textarea name="description" class="form-control" id="item-description" cols="5" rows="2">{{ old('description') }}</textarea>
-                                </div>
+                            <div class="col-md-8 mb-3">
+                                <label for="item-description" class="form-label">Item description</label>
+                                <textarea name="description" class="form-control" id="item-description" cols="5" rows="1">{{ old('description') }}</textarea>
                             </div>
                         </div>
-                        <div class="form-group mt-3">
-                            <details class="mb-3">
-                                <summary class="cursor-pointer font-semibold text-blue-600">Select Ingredients (Store Items in current Outlet):</summary>
-                                <div id="store-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
-                                    @foreach ($outletStoreItems as $item)
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-text">
-                                            <label>
-                                                <input class="form-check-input" type="checkbox" name="store_items[{{ $item->id }}][checked]"
-                                                    {{ isset($menuItem) && $menuItem->outletStoreItems->contains($item->id) ? 'checked' : '' }}>
-                                                {{ $item->storeItem->name }}
-                                            </label>
-                                        </div>
-                                        <input type="number" name="store_items[{{ $item->id }}][quantity_used]"
-                                            step="0.01" placeholder="Qty used" class="ml-2 w-24 form-control"
-                                            value="{{ isset($menuItem) && $menuItem->outletStoreItems->find($item->id)?->pivot?->quantity_used ?? '' }}">
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </details>
-                        </div>
-
+                        @if(isset($menuItem))
+                        @if($menuItem->is_combo)
                         <div class="form-group mt-3">
                             <details class="mb-3">
                                 <summary class="cursor-pointer font-semibold text-blue-600">Select Combo Items (Menu Items):</summary>
@@ -109,13 +87,42 @@
                                             </label>
                                         </div>
                                         <input type="number" name="combo_items[{{ $comboItem->id }}][quantity]"
-                                            step="0.01" placeholder="Qty used" class="ml-2 w-24 form-control"
+                                            inputmode="decimal" min="0" step="any" placeholder="Qty used" class="ml-2 w-24 form-control"
                                             value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->qty }}">
                                     </div>
                                     @endforeach
                                 </div>
                             </details>
                         </div>
+                        @else
+                        <div class="form-group mt-3">
+                            <details class="mb-3">
+                                <summary class="cursor-pointer font-semibold text-blue-600">Select Ingredients (Store Items):</summary>
+                                <div id="store-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
+                                    @foreach ($storeItems as $storeItem)
+
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-text">
+                                            <label>
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="store_items[{{ $storeItem->id }}][checked]"
+                                                    {{ isset($menuItem) && $menuItem->ingredients->contains($storeItem->id) ? 'checked' : '' }}>
+                                                {{ $storeItem->name }}
+                                            </label>
+                                        </div>
+                                        <input type="number"
+                                            name="store_items[{{ $storeItem->id }}][quantity_needed]"
+                                            inputmode="decimal" min="0" step="any"
+                                            placeholder="Qty needed"
+                                            class="ml-2 w-24 form-control"
+                                            value="{{ isset($menuItem) && $menuItem->ingredients->find($storeItem->id)?->pivot->quantity_needed }}">
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </details>
+                        </div>
+                        @endif
+                        @endif
                     </div>
                     <div class="col-md-4">
                         <div class="card mt-4">

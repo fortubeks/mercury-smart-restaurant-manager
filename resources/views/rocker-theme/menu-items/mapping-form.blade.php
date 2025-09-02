@@ -25,20 +25,20 @@
                                 <td class="border px-4 py-2">
                                     <select name="mappings[{{ $menuItem->id }}]" class="form-select">
                                         <option value="">Select Store Item</option>
-                                        @foreach($outletStoreItems as $outletStoreItem)
-                                        <option value="{{ $outletStoreItem->id }}"
-                                            {{ $menuItem->outletStoreItems->contains($outletStoreItem->id) ? 'selected' : '' }}>
-                                            {{ $outletStoreItem->storeItem->name }}
+                                        @foreach($storeItems as $storeItem)
+                                        <option value="{{ $storeItem->id }}"
+                                            {{ $menuItem->ingredients->contains('store_item_id', $storeItem->id) ? 'selected' : '' }}>
+                                            {{ $storeItem->name }}
                                         </option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td><input type="number"
-                                        name="store_items[{{ $menuItem->id }}][quantity_used]"
-                                        step="0.01"
-                                        placeholder="Qty used"
+                                        name="store_items[{{ $menuItem->id }}][quantity_needed]"
+                                        inputmode="decimal" min="0" step="any"
+                                        placeholder="Qty needed"
                                         class="ml-2 w-24 form-control"
-                                        value="{{ $menuItem->outletStoreItems->firstWhere('id', $menuItem->outletStoreItems->first()?->id)?->pivot?->quantity_used ?? '' }}"></td>
+                                        value="{{ $menuItem->ingredients->firstWhere('store_item_id', $menuItem->ingredients->first()?->id)?->pivot?->quantity_needed ?? '' }}"></td>
                             </tr>
                             @endforeach
                         </tbody>

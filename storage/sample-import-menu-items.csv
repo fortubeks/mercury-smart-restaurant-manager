@@ -1,4 +1,4 @@
-name,price,description,is_available,category
+name,price,description,is_available,category,is_combo
 Chicken,4000,,TRUE,Grills
 Bread,4000,,TRUE,Starter
 Beef,4000,,TRUE,Protein

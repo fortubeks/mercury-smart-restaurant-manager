@@ -50,6 +50,7 @@ class MenuItemImport implements ToModel, WithStartRow, WithEvents
             'description' => $row[2] ?? null,
             'is_available' => $row[3] ?? 1,
             'menu_category_id' => $categoryId,
+            'is_combo' => $row[5] ?? 0,
         ]);
     }
 

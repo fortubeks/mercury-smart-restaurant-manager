@@ -45,7 +45,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div>
-                            <div class="chip">Category: {{$store_item->category()}}</div>
+                            <div class="chip">Category: {{$store_item->category->name}}</div>
                             <div class="chip">Stock Balance: {{$stockBalance}}</div>
                             <div class="chip">Units Sold: {{$store_item->quantity_sold}}</div>
                             <div class="chip">Revenue: {{formatCurrency($store_item->revenue)}}</div>

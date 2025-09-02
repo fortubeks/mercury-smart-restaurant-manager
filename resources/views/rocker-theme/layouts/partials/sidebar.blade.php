@@ -115,6 +115,7 @@
                 <li> <a href="{{ route('store-items.index') }}"><i class='bx bx-radio-circle'></i>Store Items</a></li>
                 <li> <a href="{{ route('store.give-items') }}"><i class='bx bx-radio-circle'></i>Give Items</a></li>
                 <li> <a href="{{ route('store-item.migrate-items') }}"><i class='bx bx-radio-circle'></i>Migrate Items</a></li>
+                <li> <a href="#"><i class='bx bx-radio-circle'></i>Manage Item Categories</a></li>
                 <!-- Add the "Inventories" dropdown -->
                 <li>
                     <a class="has-arrow" href="javascript:;">

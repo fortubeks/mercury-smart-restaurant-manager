@@ -42,7 +42,7 @@
                             @endif
                         </td>
                         <td>{{ $storeItem->name }}</td>
-                        <td>{{ $storeItem->category() }}</td>
+                        <td>{{ $storeItem->category->name }}</td>
                         <x-stock-alert :qty="$storeItem->total_qty" :low-stock="$storeItem->low_stock_alert" />
                         <td>{{ $storeItem->unit_measurement }}</td>
                         <td>{{ $storeItem->for_sale ? 'Yes' : 'No' }}</td>

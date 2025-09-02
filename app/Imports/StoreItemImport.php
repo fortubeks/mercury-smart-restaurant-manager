@@ -54,6 +54,7 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
 
             $storeItem = new StoreItem([
                 'name' => $row[0],
+                'restaurant_id' => restaurantId(),
                 'description' => $row[1],
                 'item_category_id' => $category->id,
                 'code' => $code,

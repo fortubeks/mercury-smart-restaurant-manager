@@ -60,7 +60,7 @@ class RestaurantSetupService
             ]);
 
             // Create default store item categories
-            $defaultCategories = ['Food', 'Drinks', 'Ingredients', 'Packaging', 'Others'];
+            $defaultCategories = ['Food', 'Drinks', 'Ingredients', 'Packaging', 'Others', 'Administrative', 'Housekeeping', 'Staff'];
             foreach ($defaultCategories as $name) {
                 StoreItemCategory::create([
                     'restaurant_id' => $restaurant->id,

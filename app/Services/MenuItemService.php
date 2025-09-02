@@ -50,10 +50,10 @@ class MenuItemService
                 $item = MenuItem::create($data);
             }
 
-            // Sync outlet store items
-            $syncData = $this->getSyncDataForOutletStoreItems($request);
+            // Sync ingredients
+            $syncData = $this->getSyncDataForIngredients($request);
 
-            $item->outletStoreItems()->sync($syncData);
+            $item->ingredients()->sync($syncData);
 
             // Sync combo items
             $comboItems = $request->input('combo_items', []);
@@ -87,14 +87,14 @@ class MenuItemService
         }
     }
 
-    public function getSyncDataForOutletStoreItems($request)
+    public function getSyncDataForIngredients($request)
     {
         $syncData = [];
         $storeItems = $request->input('store_items', []);
-        foreach ($storeItems as $outletStoreItemId => $values) {
-            if (isset($values['checked']) && isset($values['quantity_used'])) {
-                $syncData[$outletStoreItemId] = [
-                    'quantity_used' => $values['quantity_used']
+        foreach ($storeItems as $ingredientId => $values) {
+            if (isset($values['checked']) && isset($values['quantity_needed'])) {
+                $syncData[$ingredientId] = [
+                    'quantity_needed' => $values['quantity_needed']
                 ];
             }
         }

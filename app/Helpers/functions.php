@@ -178,7 +178,7 @@ function getModelList($model)
         'asset-categories' => AssetCategory::whereIn('restaurant_id', [1, $restaurant_id])->orderBy('name')->get(),
         'genders' => ['Female' => 'female', 'Male' => 'male'],
         'delivery-areas' => DeliveryArea::where('state_id', $restaurant->state_id)->orderBy('name')->get(),
-        'unit-measurements' => ['Kilogram (Kg)' => 'kg', 'Pieces (pcs)' => 'pcs'],
+        'unit-measurements' => ['Kilogram (Kg)' => 'kg', 'Pieces (pcs)' => 'pcs', 'Litres (L)' => 'l', 'Grams (g)' => 'g'],
         'modules' => Module::all(),
         'delivery-riders' => DeliveryRider::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
         'stores' => Store::where('restaurant_id', $restaurant_id)->orderBy('name')->get(),
