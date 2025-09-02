@@ -180,7 +180,7 @@ class MenuItemController extends Controller
         $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
         //$outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
         $storeItems = StoreItem::whereHas('category', function ($query) {
-            $query->where('name', 'Food')->where('name', 'Drinks');
+            $query->where('name', 'Food')->orWhere('name', 'Drinks');
         })
             ->where('for_sale', true)
             ->get();
