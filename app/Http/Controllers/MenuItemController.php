@@ -180,7 +180,7 @@ class MenuItemController extends Controller
         $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
         //$outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
         $storeItems = StoreItem::whereHas('category', function ($query) {
-            $query->where('name', 'Food');
+            $query->where('name', 'Food')->where('name', 'Drinks');
         })
             ->where('for_sale', true)
             ->get();
@@ -199,15 +199,15 @@ class MenuItemController extends Controller
             'store_items.*.quantity_used' => 'nullable|numeric|min:0',
         ]);
 
-        foreach ($request->input('mappings', []) as $menuItemId => $outletStoreItemId) {
+        foreach ($request->input('mappings', []) as $menuItemId => $storeItemId) {
             $menuItem = MenuItem::find($menuItemId);
             $quantityUsed = $request->input("store_items.$menuItemId.quantity_used", 0);
 
-            if (!$menuItem || !$outletStoreItemId) continue;
+            if (!$menuItem || !$storeItemId) continue;
 
             // Attach or update the pivot table
-            $menuItem->outletStoreItems()->syncWithoutDetaching([
-                $outletStoreItemId => ['quantity_used' => $quantityUsed]
+            $menuItem->ingredients()->syncWithoutDetaching([
+                $storeItemId => ['quantity_needed' => $quantityUsed]
             ]);
         }
 
