@@ -40,8 +40,14 @@ class StoreItemImport implements ToModel, WithStartRow, WithEvents
     {
         // Validate required columns
         return \DB::connection()->transaction(function () use ($row) {
-            if (is_null($row[0])  || is_null($row[2]) || is_null($row[3]) || is_null($row[4])) {
+            if (is_null($row[0])  || is_null($row[2]) || is_null($row[3])) {
                 $this->errors[] = "Row " . ($this->importedItemCount + 2) . " has missing required fields.";
+                return null; // Skip this row
+            }
+
+            //skip row if name and restaurant id already exists
+            if (StoreItem::where('name', $row[0])->where('restaurant_id', restaurantId())->exists()) {
+                $this->errors[] = "Row " . ($this->importedItemCount + 2) . " - Item with name '" . $row[0] . "' already exists. Skipping.";
                 return null; // Skip this row
             }
 

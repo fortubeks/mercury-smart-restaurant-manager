@@ -62,7 +62,7 @@ class MenuItemController extends Controller
     {
         $menuItem = MenuItem::findOrFail($id);
         $storeItems = StoreItem::whereHas('category', function ($query) {
-            $query->where('name', 'Food');
+            $query->where('name', 'Food')->orWhere('name', 'Drinks');
         })->orderBy('name', 'asc')->get();
         $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->orderBy('name', 'asc')->get();
         return theme_view('menu-items.form')->with(compact('menuItems', 'storeItems', 'menuItem'));
