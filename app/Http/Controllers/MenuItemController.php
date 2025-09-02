@@ -201,7 +201,7 @@ class MenuItemController extends Controller
 
         foreach ($request->input('mappings', []) as $menuItemId => $storeItemId) {
             $menuItem = MenuItem::find($menuItemId);
-            $quantityUsed = $request->input("store_items.$menuItemId.quantity_used", 0);
+            $quantityUsed = $request->input("store_items.$menuItemId.quantity_needed", 0);
 
             if (!$menuItem || !$storeItemId) continue;
 

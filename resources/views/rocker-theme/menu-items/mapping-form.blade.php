@@ -27,7 +27,7 @@
                                         <option value="">Select Store Item</option>
                                         @foreach($storeItems as $storeItem)
                                         <option value="{{ $storeItem->id }}"
-                                            {{ $menuItem->ingredients->contains('store_item_id', $storeItem->id) ? 'selected' : '' }}>
+                                            {{ $menuItem->ingredients->contains('id', $storeItem->id) ? 'selected' : '' }}>
                                             {{ $storeItem->name }}
                                         </option>
                                         @endforeach
@@ -38,7 +38,7 @@
                                         inputmode="decimal" min="0" step="any"
                                         placeholder="Qty needed"
                                         class="ml-2 w-24 form-control"
-                                        value="{{ $menuItem->ingredients->firstWhere('store_item_id', $menuItem->ingredients->first()?->id)?->pivot?->quantity_needed ?? '' }}"></td>
+                                        value="{{ $menuItem->ingredients->firstWhere('id', $menuItem->ingredients->first()?->id)?->pivot?->quantity_needed ?? '' }}"></td>
                             </tr>
                             @endforeach
                         </tbody>
