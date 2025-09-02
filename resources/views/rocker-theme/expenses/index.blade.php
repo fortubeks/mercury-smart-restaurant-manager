@@ -3,7 +3,12 @@
 <div class="page-wrapper">
     <div class="page-content">
         <!--breadcrumb-->
-
+        <div class="d-lg-flex align-items-center mb-4 gap-3">
+            <div class="position-relative">
+                <h5>Expenses</h5>
+            </div>
+            <div class="ms-auto"><a href="{{ route('expenses.create') }}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="bx bxs-plus-square"></i>New PuExpenserchase</a></div>
+        </div>
         <!--end breadcrumb-->
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4">

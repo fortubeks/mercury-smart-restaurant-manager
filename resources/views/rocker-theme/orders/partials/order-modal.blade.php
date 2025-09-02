@@ -39,15 +39,14 @@
                         <div class="tab-title">Delivery Information</div>
                         <div class="mb-3">
                             <label for="delivery-area" class="form-label">Delivery Area</label>
-                            <select class="form-select" name="delivery_area_id" id="delivery-area">
-                                <option value="">--Select Area--</option>
+                            <input class="form-control" list="delivery-areas" name="delivery_area_name" id="delivery-area"
+                                value="{{ $cartData['order_info']['selected_delivery_area_name'] ?? '' }}">
+
+                            <datalist id="delivery-areas">
                                 @foreach(getModelList('delivery-areas') as $area)
-                                <option value="{{ $area->id }}"
-                                    {{ (isset($cartData['order_info']['selected_delivery_area_id']) && $cartData['order_info']['selected_delivery_area_id'] == $area->id) ? 'selected' : '' }}>
-                                    {{ $area->name }}
-                                </option>
-                                @endforeach
-                            </select>
+                                <option value="{{ $area->name }}">
+                                    @endforeach
+                            </datalist>
                         </div>
                         <div class="mb-3">
                             <label for="delivery-address" class="form-label">Delivery Address</label>
@@ -258,7 +257,7 @@
             // Populate summary
             const customer = $('.customer-option[data-id="' + $('#selected-customer-id').val() + '"]').text();
             $('#summary-customer').text(customer);
-            $('#summary-area').text($('#delivery-area option:selected').text());
+            $('#summary-area').text($('#delivery-area').val());
             $('#summary-address').text($('#delivery-address').val());
             $('#summary-rider').text($('#delivery-rider option:selected').text());
             $('#summary-fee').text($('#delivery-fee').val());

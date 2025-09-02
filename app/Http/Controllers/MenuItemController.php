@@ -178,7 +178,6 @@ class MenuItemController extends Controller
     public function showMappingForm()
     {
         $menuItems = MenuItem::where('outlet_id', outlet()->id)->where('is_combo', false)->get();
-        //$outletStoreItems = OutletStoreItem::where('outlet_id', outlet()->id)->get();
         $storeItems = StoreItem::whereHas('category', function ($query) {
             $query->where('name', 'Food')->orWhere('name', 'Drinks');
         })

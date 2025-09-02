@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Orders\OrderStoreRequest;
 use App\Models\DailySale;
+use App\Models\DeliveryArea;
 use App\Models\DeliveryRider;
 use App\Models\MenuCategory;
 use App\Models\MenuItem;
 use App\Models\MenuItemOrder;
 use App\Models\Order;
+use App\Models\State;
 use App\Services\IncomingPaymentService;
 use App\Services\OrderItemService;
 use App\Services\RestaurantCartService;
@@ -118,9 +120,10 @@ class OrderController extends Controller
         $customer_id = $cart[$orderCartId]['order_info']['customer_id'] ?? null;
         $delivery_address = $cart[$orderCartId]['order_info']['delivery_address'] ?? null;
         $delivery_rider_id = $cart[$orderCartId]['order_info']['delivery_rider_id'] ?? null;
-        $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ?? null;
         $delivery_fee = $cart[$orderCartId]['order_info']['delivery_fee'] ?? null;
         $total_amount += $delivery_fee;
+
+        $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ? $this->getDeliveryArea($cart[$orderCartId]['order_info']['delivery_area_id']) : null;
 
         $request->merge([
             'total_amount' => $total_amount,
@@ -183,6 +186,24 @@ class OrderController extends Controller
                 'error' => 'An error occurred. Please try again.',
             ]);
         }
+    }
+
+    private function getDeliveryArea($delivery_area_name)
+    {
+        $areaName = trim($delivery_area_name);
+
+        // Find existing area by case-insensitive match (to avoid duplicates)
+        $existingArea = DeliveryArea::whereRaw('LOWER(name) = ?', [strtolower($areaName)])->first();
+
+        if ($existingArea) {
+            $deliveryAreaId = $existingArea->id;
+        } else {
+            // Create new area if none exists
+            $state = State::where('name', 'Rivers')->where('country_id', 161)->first();
+            $newArea = DeliveryArea::create(['state_id' => $state->id, 'name' => $areaName]);
+            $deliveryAreaId = $newArea->id;
+        }
+        return $deliveryAreaId;
     }
 
     public function addRestaurantOrderPayment(Request $request)
