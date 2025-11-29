@@ -24,7 +24,8 @@
                         <th>Image</th>
                         <th>Name</th>
                         <th>Category</th>
-                        <th>Stock Balance</th>
+                        <th>Outlet Balance</th>
+                        <th>Store Balance</th>
                         <th>Unit</th>
                         <th>For Sale</th>
                         <th>Store</th>
@@ -43,6 +44,7 @@
                         </td>
                         <td>{{ $storeItem->name }}</td>
                         <td>{{ $storeItem->category->name }}</td>
+                        <x-stock-alert :qty="$storeItem->outletStoreItems()->sum('qty')" :low-stock="$storeItem->low_stock_alert" />
                         <x-stock-alert :qty="$storeItem->total_qty" :low-stock="$storeItem->low_stock_alert" />
                         <td>{{ $storeItem->unit_measurement }}</td>
                         <td>{{ $storeItem->for_sale ? 'Yes' : 'No' }}</td>

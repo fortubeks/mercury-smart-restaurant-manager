@@ -6,7 +6,7 @@
         <h5 class="card-title">{{ isset($menuItem) ? 'Edit Menu Item' : 'Add New Menu Item' }} [<a href="{{route('menu-items.import.form')}}">Bulk Import</a>]</h5>
         <hr>
         <div class="form-body mt-4">
-            <form class="row g-3" id="form" method="POST" action="{{ isset($menuItem) ? route('menu-items.update', $menuItem->id) : route('menu-items.store') }}" enctype="multipart/form-data">
+            <form class="row g-3" method="POST" action="{{ isset($menuItem) ? route('menu-items.update', $menuItem->id) : route('menu-items.store') }}" enctype="multipart/form-data">
                 @csrf
                 @if(isset($menuItem))
                 @method('PUT')
@@ -96,62 +96,28 @@
                         </div>
                         @else
                         <div class="form-group mt-3">
-                            @if ($menuItem->ingredients->isNotEmpty())
-                            Ingredients:
-                            <ul>
-                                @foreach ($menuItem->ingredients as $ingredient)
-                                <li>
-                                    {{ $ingredient->name }} –
-                                    {{ number_format($ingredient->pivot->quantity_needed, 2) }}
-                                    {{ $ingredient->unit_measurement ?? '' }}
-                                </li>
-                                @endforeach
-                            </ul>
-                            @else
-                            <p>No ingredients added yet.</p>
-                            @endif
                             <details class="mb-3">
                                 <summary class="cursor-pointer font-semibold text-blue-600">Select Ingredients (Store Items):</summary>
                                 <div id="store-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
-                                    <table id="storeItemsTable" class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Item</th>
-                                                <th>Qty Needed (g, ml or pcs)</th>
-                                            </tr>
-                                        </thead>
+                                    @foreach ($storeItems as $storeItem)
 
-                                        <tbody>
-                                            @foreach ($storeItems as $storeItem)
-                                            <tr>
-                                                <td>
-                                                    <label>
-                                                        <input class="form-check-input" type="checkbox"
-                                                            name="store_items[{{ $storeItem->id }}][checked]"
-                                                            {{ isset($menuItem) && $menuItem->ingredients->contains($storeItem->id) ? 'checked' : '' }}>
-                                                        {{ $storeItem->name }}
-                                                    </label>
-                                                </td>
-
-                                                <td>
-                                                    @php
-                                                    $quantityNeeded = $menuItem->ingredients->find($storeItem->id)?->pivot->quantity_needed ?? '';
-                                                    $formattedQty = is_numeric($quantityNeeded) ? number_format($quantityNeeded, 2, '.', '') : '';
-                                                    @endphp
-
-                                                    <input type="number"
-                                                        name="store_items[{{ $storeItem->id }}][quantity_needed]"
-                                                        class="form-control w-24"
-                                                        step="any"
-                                                        min="0"
-                                                        inputmode="decimal"
-                                                        placeholder="Qty needed"
-                                                        value="{{ $formattedQty }}">
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-text">
+                                            <label>
+                                                <input class="form-check-input" type="checkbox"
+                                                    name="store_items[{{ $storeItem->id }}][checked]"
+                                                    {{ isset($menuItem) && $menuItem->ingredients->contains($storeItem->id) ? 'checked' : '' }}>
+                                                {{ $storeItem->name }}
+                                            </label>
+                                        </div>
+                                        <input type="number"
+                                            name="store_items[{{ $storeItem->id }}][quantity_needed]"
+                                            inputmode="decimal" min="0" step="any"
+                                            placeholder="Qty needed"
+                                            class="ml-2 w-24 form-control"
+                                            value="{{ isset($menuItem) && $menuItem->ingredients->find($storeItem->id)?->pivot->quantity_needed }}">
+                                    </div>
+                                    @endforeach
                                 </div>
                             </details>
                         </div>
@@ -167,7 +133,7 @@
                                     @if($menuItem->featuredImage)
                                     <img src="{{ asset($menuItem->featuredImage->image_path) }}" alt="Featured Image" style="max-width: 100%; height: auto;">
                                     @else
-                                    <img src="https://placehold.co/300x200" alt="No Image" style="max-width: 100%; height: auto;">
+                                    <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No Image" style="max-width: 100%; height: auto;">
                                     @endif
                                     @endif
                                     <input type="file" name="image" id="image"
@@ -206,39 +172,7 @@
 
 <script>
     window.addEventListener('load', function() {
-        var items_table = $('#storeItemsTable').DataTable({
-            pageLength: 20,
-            searching: true,
-            ordering: false, // keep original order
-        });
 
-        $('#form').on('submit', function(e) {
-            // Loop over all inputs (even hidden ones)
-            items_table.$('input, select, textarea').each(function() {
-                if (!$.contains(document, this)) {
-                    // Append hidden field with same name and value
-                    $('<input>').attr({
-                        type: 'hidden',
-                        name: this.name,
-                        value: $(this).val()
-                    }).appendTo('#form');
-                }
-            });
-        });
-
-        document.querySelectorAll('input[name^="store_items"][name$="[quantity_needed]"]').forEach(function(qtyInput) {
-
-            qtyInput.addEventListener('input', function() {
-                let row = qtyInput.closest('tr');
-                let checkbox = row.querySelector('input[type="checkbox"]');
-
-                if (qtyInput.value.trim() !== "") {
-                    checkbox.checked = true;
-                } else {
-                    checkbox.checked = false;
-                }
-            });
-        });
     });
 </script>
 @endsection

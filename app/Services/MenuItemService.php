@@ -52,9 +52,7 @@ class MenuItemService
 
             // Sync ingredients
             $syncData = $this->getSyncDataForIngredients($request);
-
             $item->ingredients()->sync($syncData);
-
             // Sync combo items
             $comboItems = $request->input('combo_items', []);
             $syncData = [];
@@ -69,7 +67,6 @@ class MenuItemService
             $item->components()->sync($syncData);
 
             if ($request->hasFile('image')) {
-                //$imagePath = $request->file('image')->store('menu-items/images', 'public');
                 $uploadedImagePath = $this->mediaUploadService->upload($request->file('image'), 'menu-items/images', 'image');
                 $item->images()->create([
                     'image_path' => $uploadedImagePath,
@@ -91,11 +88,10 @@ class MenuItemService
     {
         $syncData = [];
         $storeItems = $request->input('store_items', []);
+
         foreach ($storeItems as $ingredientId => $values) {
             if (isset($values['checked']) && isset($values['quantity_needed'])) {
-                $syncData[$ingredientId] = [
-                    'quantity_needed' => $values['quantity_needed']
-                ];
+                $syncData[$ingredientId] = ['quantity_needed' => $values['quantity_needed']];
             }
         }
         return $syncData;
