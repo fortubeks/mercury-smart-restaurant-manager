@@ -77,20 +77,41 @@
                             <details class="mb-3">
                                 <summary class="cursor-pointer font-semibold text-blue-600">Select Combo Items (Menu Items):</summary>
                                 <div id="combo-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
-                                    @foreach ($menuItems as $comboItem)
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-text">
-                                            <label>
-                                                <input class="form-check-input" type="checkbox" name="combo_items[{{ $comboItem->id }}][checked]"
-                                                    {{ isset($menuItem) && $menuItem->components->contains($comboItem->id) ? 'checked' : '' }}>
-                                                {{ $comboItem->name }}
-                                            </label>
-                                        </div>
-                                        <input type="number" name="combo_items[{{ $comboItem->id }}][quantity]"
-                                            inputmode="decimal" min="0" step="any" placeholder="Qty used" class="ml-2 w-24 form-control"
-                                            value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->qty }}">
-                                    </div>
-                                    @endforeach
+                                    <table id="combo-items-table" class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Quantity Used</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @foreach ($menuItems as $comboItem)
+                                            <tr>
+                                                <td>
+                                                    <label class="d-flex align-items-center gap-2">
+                                                        <input class="form-check-input"
+                                                            type="checkbox"
+                                                            name="combo_items[{{ $comboItem->id }}][checked]"
+                                                            {{ isset($menuItem) && $menuItem->components->contains($comboItem->id) ? 'checked' : '' }}>
+                                                        {{ $comboItem->name }}
+                                                    </label>
+                                                </td>
+
+                                                <td style="width: 140px;">
+                                                    <input type="number"
+                                                        name="combo_items[{{ $comboItem->id }}][quantity]"
+                                                        inputmode="decimal"
+                                                        min="0"
+                                                        step="any"
+                                                        placeholder="Qty used"
+                                                        class="form-control form-control-sm"
+                                                        value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->qty }}">
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </details>
                         </div>
@@ -212,9 +233,25 @@
             ordering: false, // keep original order
         });
 
+        var combo_items_table = $('#combo-items-table').DataTable({
+            pageLength: 20,
+            searching: true,
+            ordering: false, // keep original order
+        });
+
         $('#form').on('submit', function(e) {
             // Loop over all inputs (even hidden ones)
             items_table.$('input, select, textarea').each(function() {
+                if (!$.contains(document, this)) {
+                    // Append hidden field with same name and value
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: this.name,
+                        value: $(this).val()
+                    }).appendTo('#form');
+                }
+            });
+            combo_items_table.$('input, select, textarea').each(function() {
                 if (!$.contains(document, this)) {
                     // Append hidden field with same name and value
                     $('<input>').attr({
