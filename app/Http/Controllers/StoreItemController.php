@@ -63,6 +63,7 @@ class StoreItemController extends Controller
         $data['store_id'] = restaurant()->defaultStore->id;
         $data['code'] = generateUniqueItemCode();
         $data['qty'] = $request->qty;
+        $data['restaurant_id'] = restaurantId();
         $data = array_merge($data, $image);
 
         $storeItem = StoreItem::create($data);
@@ -74,7 +75,7 @@ class StoreItemController extends Controller
         if ($data['qty'] > 0) {
             (new PurchaseStoreService)->create([
                 'store_id' => $data['store_id'],
-                'restaurant_id' => restaurantId(),
+                'restaurant_id' => $data['restaurant_id'],
                 'purchase_date' => now()->toDateString(),
                 'sub_total' => 0,
                 'total_amount' => 0,

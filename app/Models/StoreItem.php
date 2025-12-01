@@ -11,7 +11,6 @@ class StoreItem extends Model
         'item_category_id',
         'description',
         'unit_measurement',
-        'qty',
         'for_sale',
         'code',
         'low_stock_alert',

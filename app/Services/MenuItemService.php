@@ -57,11 +57,12 @@ class MenuItemService
             $comboItems = $request->input('combo_items', []);
             $syncData = [];
 
+            //logger($comboItems);
+
             foreach ($comboItems as $componentId => $values) {
-                if (isset($values['checked']) && $values['checked']) {
-                    $syncData[$componentId] = [
-                        'qty' => $values['quantity'] ?? 1
-                    ];
+                if (isset($values['checked']) && isset($values['quantity'])) {
+                    //logger("Syncing component ID: $componentId with quantity: " . $values['quantity']);
+                    $syncData[$componentId] = ['qty' => $values['quantity']];
                 }
             }
             $item->components()->sync($syncData);

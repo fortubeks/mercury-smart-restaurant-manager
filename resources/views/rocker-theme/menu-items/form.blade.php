@@ -74,6 +74,19 @@
                         @if(isset($menuItem))
                         @if($menuItem->is_combo)
                         <div class="form-group mt-3">
+                            @if ($menuItem->components->isNotEmpty())
+                            Combo Items:
+                            <ul>
+                                @foreach ($menuItem->components as $comboItem)
+                                <li>
+                                    {{ $comboItem->name }} –
+                                    {{ number_format($comboItem->pivot->qty, 2) }} portions
+                                </li>
+                                @endforeach
+                            </ul>
+                            @else
+                            <p>No ingredients added yet.</p>
+                            @endif
                             <details class="mb-3">
                                 <summary class="cursor-pointer font-semibold text-blue-600">Select Combo Items (Menu Items):</summary>
                                 <div id="combo-items-container" class="mt-2 max-h-64 overflow-y-auto border p-2 rounded bg-gray-50">
@@ -87,6 +100,10 @@
 
                                         <tbody>
                                             @foreach ($menuItems as $comboItem)
+                                            @php
+                                            $quantityNeeded = $menuItem->components->find($comboItem->id)?->pivot->qty ?? '';
+                                            $formattedQty = is_numeric($quantityNeeded) ? number_format($quantityNeeded, 2, '.', '') : '';
+                                            @endphp
                                             <tr>
                                                 <td>
                                                     <label class="d-flex align-items-center gap-2">
@@ -106,7 +123,7 @@
                                                         step="any"
                                                         placeholder="Qty used"
                                                         class="form-control form-control-sm"
-                                                        value="{{ isset($menuItem) && $menuItem->components->find($comboItem->id)?->pivot->qty }}">
+                                                        value="{{ $formattedQty }}">
                                                 </td>
                                             </tr>
                                             @endforeach
@@ -240,10 +257,14 @@
         });
 
         $('#form').on('submit', function(e) {
-            // Loop over all inputs (even hidden ones)
-            items_table.$('input, select, textarea').each(function() {
-                if (!$.contains(document, this)) {
-                    // Append hidden field with same name and value
+
+            // Collect all input/select fields EXCEPT checkboxes
+            items_table.$('input:not([type="checkbox"]), select, textarea').each(function() {
+
+                // If field is not currently in the DOM (due to pagination)
+                if (!document.contains(this)) {
+
+                    // Add a hidden field so the value is still submitted
                     $('<input>').attr({
                         type: 'hidden',
                         name: this.name,
@@ -251,9 +272,12 @@
                     }).appendTo('#form');
                 }
             });
-            combo_items_table.$('input, select, textarea').each(function() {
-                if (!$.contains(document, this)) {
-                    // Append hidden field with same name and value
+            combo_items_table.$('input:not([type="checkbox"]), select, textarea').each(function() {
+
+                // If field is not currently in the DOM (due to pagination)
+                if (!document.contains(this)) {
+
+                    // Add a hidden field so the value is still submitted
                     $('<input>').attr({
                         type: 'hidden',
                         name: this.name,
@@ -261,6 +285,49 @@
                     }).appendTo('#form');
                 }
             });
+            combo_items_table.$('input[type="checkbox"]').each(function() {
+
+                // Checkbox fields NOT present in DOM (paginated out)
+                if (!document.contains(this)) {
+
+                    if ($(this).is(':checked')) {
+                        // If it was checked → submit a hidden checked version
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: this.name,
+                            value: 1
+                        }).appendTo('#form');
+                    } else {
+                        // If it was not checked → submit hidden value 0
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: this.name,
+                            value: 0
+                        }).appendTo('#form');
+                    }
+                }
+            });
+            // // Loop over all inputs (even hidden ones)
+            // items_table.$('input, select, textarea').each(function() {
+            //     if (!$.contains(document, this)) {
+            //         // Append hidden field with same name and value
+            //         $('<input>').attr({
+            //             type: 'hidden',
+            //             name: this.name,
+            //             value: $(this).val()
+            //         }).appendTo('#form');
+            //     }
+            // });
+            // combo_items_table.$('input[type="number"], input[type="text"], select').each(function() {
+            //     if (!$.contains(document, this)) {
+            //         // Append hidden field with same name and value
+            //         $('<input>').attr({
+            //             type: 'hidden',
+            //             name: this.name,
+            //             value: $(this).val()
+            //         }).appendTo('#form');
+            //     }
+            // });
         });
 
         document.querySelectorAll('input[name^="store_items"][name$="[quantity_needed]"]').forEach(function(qtyInput) {
