@@ -93,7 +93,6 @@ class MenuItemService
         foreach ($storeItems as $ingredientId => $values) {
             if (isset($values['checked']) && isset($values['quantity_needed'])) {
                 $syncData[$ingredientId] = ['quantity_needed' => $values['quantity_needed']];
-                logger("Syncing ingredient ID: $ingredientId with quantity needed: " . $values['quantity_needed']);
             }
         }
         return $syncData;
