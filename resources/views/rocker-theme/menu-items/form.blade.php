@@ -285,6 +285,28 @@
                     }).appendTo('#form');
                 }
             });
+            items_table.$('input[type="checkbox"]').each(function() {
+
+                // Checkbox fields NOT present in DOM (paginated out)
+                if (!document.contains(this)) {
+
+                    if ($(this).is(':checked')) {
+                        // If it was checked → submit a hidden checked version
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: this.name,
+                            value: 1
+                        }).appendTo('#form');
+                    } else {
+                        // If it was not checked → submit hidden value 0
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: this.name,
+                            value: 0
+                        }).appendTo('#form');
+                    }
+                }
+            });
             combo_items_table.$('input[type="checkbox"]').each(function() {
 
                 // Checkbox fields NOT present in DOM (paginated out)
