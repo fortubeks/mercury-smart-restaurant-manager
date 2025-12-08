@@ -44,7 +44,8 @@ class StoreItemUpdateImport implements ToModel, WithStartRow, WithEvents
         $storeItem = StoreItem::updateOrCreate(
             ['id' => $row[0]],
             [
-                'name' => $row[4],
+                'name' => $row[3],
+                'unit_measurement' => $row[7]
             ]
         );
         $this->importedItemCount++;
