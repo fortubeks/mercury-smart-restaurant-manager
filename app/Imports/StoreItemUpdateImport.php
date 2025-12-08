@@ -22,7 +22,7 @@ class StoreItemUpdateImport implements ToModel, WithStartRow, WithEvents
 
     public function __construct()
     {
-        $this->store_id = auth()->user()->userAccount->hotel->store->id;
+        $this->store_id = auth()->user()->userAccount->restaurant->defaultStore->id;
     }
     /**
      * @param array $row
