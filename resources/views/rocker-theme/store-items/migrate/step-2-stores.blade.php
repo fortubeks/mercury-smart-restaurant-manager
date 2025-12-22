@@ -5,7 +5,7 @@
 
 <div class="row mb-5">
     <div class="col-xl-12 mx-auto">
-        <form action="{{ route('store-item.migrate-items.post') }}" method="POST">
+        <form id="form" action="{{ route('store-item.migrate-items.post') }}" method="POST">
             @csrf
             <div class="mb-3">
                 <input type="hidden" name="from_id" value="{{ $storeA->id }}">
@@ -14,7 +14,7 @@
                 <input type="hidden" name="to_type" value="store">
             </div>
 
-            <table class="table table-bordered mb-0" id="migration-table">
+            <table class="table table-bordered mb-0" id="items-data-table">
                 <thead>
                     <tr>
                         <th>Item Code ({{ $storeA->name }})</th>
@@ -64,7 +64,10 @@
 @endsection
 <script>
     window.addEventListener('load', function() {
-        $('#migration-table').DataTable({
+
+
+        var items_table = $('#items-data-table').DataTable({
+            lengthChange: false,
             paging: true,
             searching: true,
             ordering: true,
@@ -75,5 +78,22 @@
                 } // disable sorting on "Quantity to Send"
             ]
         });
+
+        items_table.buttons().container().appendTo('#items-data-table_wrapper .col-md-6:eq(0)');
+
+        $('#form').on('submit', function(e) {
+            // Loop over all inputs (even hidden ones)
+            items_table.$('input, select, textarea').each(function() {
+                if (!$.contains(document, this)) {
+                    // Append hidden field with same name and value
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: this.name,
+                        value: $(this).val()
+                    }).appendTo('#form');
+                }
+            });
+        });
+
     });
 </script>

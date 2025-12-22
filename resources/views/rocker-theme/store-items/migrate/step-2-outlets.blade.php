@@ -5,7 +5,7 @@
 
 <div class="row mb-5">
     <div class="col-xl-12 mx-auto">
-        <form action="{{ url('store-item.migrate-items.post') }}" method="POST">
+        <form id="form" action="{{ url('store-item.migrate-items.post') }}" method="POST">
             @csrf
             <div class="mb-3">
                 <input type="hidden" name="from_id" value="{{$outletA->id}}">
@@ -13,7 +13,7 @@
                 <input type="hidden" name="from_type" value="outlet">
                 <input type="hidden" name="to_type" value="outlet">
             </div>
-            <table class="table table-bordered mb-0">
+            <table id="items-data-table" class="table table-bordered mb-0">
                 <thead>
                     <tr>
                         <th>Item Code</th>
@@ -53,3 +53,28 @@
 </div>
 
 @endsection
+
+<script>
+    window.addEventListener('load', function() {
+
+        var items_table = $('#items-data-table').DataTable({
+            lengthChange: false,
+        });
+
+        items_table.buttons().container().appendTo('#items-data-table_wrapper .col-md-6:eq(0)');
+
+        $('#form').on('submit', function(e) {
+            // Loop over all inputs (even hidden ones)
+            items_table.$('input, select, textarea').each(function() {
+                if (!$.contains(document, this)) {
+                    // Append hidden field with same name and value
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: this.name,
+                        value: $(this).val()
+                    }).appendTo('#form');
+                }
+            });
+        });
+    });
+</script>

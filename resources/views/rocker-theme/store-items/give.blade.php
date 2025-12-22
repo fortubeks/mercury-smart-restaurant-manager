@@ -3,7 +3,7 @@
 <h5 class="mb-3">Move Store Items to Outlet</h5>
 <div class="row mb-5">
     <div class="col-xl-12 mx-auto">
-        <form action="{{ url('store/give-items') }}" method="POST">
+        <form id="form" action="{{ url('store/give-items') }}" method="POST">
             @csrf
             <div class="d-flex align-items-center mb-4 gap-3">
                 <div class="col-md-3">
@@ -107,6 +107,20 @@
         });
 
         items_table.buttons().container().appendTo('#items-data-table_wrapper .col-md-6:eq(0)');
+
+        $('#form').on('submit', function(e) {
+            // Loop over all inputs (even hidden ones)
+            items_table.$('input, select, textarea').each(function() {
+                if (!$.contains(document, this)) {
+                    // Append hidden field with same name and value
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: this.name,
+                        value: $(this).val()
+                    }).appendTo('#form');
+                }
+            });
+        });
     });
 </script>
 @endsection
