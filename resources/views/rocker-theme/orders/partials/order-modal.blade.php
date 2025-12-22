@@ -236,6 +236,8 @@
                 return;
             }
 
+            $('#amount-paid').val(parseFloat($('#amount-paid').val() || 0) + parseFloat($('#delivery-fee').val() || 0));
+
             //update order information
             updateOrderInformation('selected_delivery_area_id');
 
