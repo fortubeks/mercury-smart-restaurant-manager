@@ -114,7 +114,7 @@
                                                     <select name="store_items[]" class="form-select selectpicker item-select">
                                                         <option value="">--Select Item--</option>
                                                         @foreach (getModelList('store-items') as $item)
-                                                        <option value="{{ $item->id }}" data-value="{{ $item->id }}">{{ $item->name }}</option>
+                                                        <option value="{{ $item->id }}" data-value="{{ $item->id }}">{{ $item->name . ' (' . $item->unit_measurement . ')' }}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>
@@ -135,7 +135,7 @@
                                                 </td>
                                                 <td>
                                                     <label class="form-label">Amount</label>
-                                                    <input name="amount[]" type="number" class="form-control amount-input" placeholder="Amount" readonly>
+                                                    <input name="amount[]" type="number" class="form-control amount-input" placeholder="Amount" step="any" inputmode="decimal" min="0">
                                                 </td>
                                                 <td>
                                                     <label class="form-label">Unit Quantity</label>
@@ -201,6 +201,84 @@
     </div>
 </div>
 <script>
+    window.addEventListener('load', function() {
+
+        $("#add-input").click(function() {
+            let newRow = $("#input-template .input-row:first").clone();
+            newRow.find("input, select").val('');
+            newRow.appendTo("#input-container table tbody");
+            bindEvents();
+        });
+
+        function bindEvents() {
+
+            $(".qty-input").off('input').on('input', function() {
+                let row = $(this).closest('.input-row');
+                syncQty(row);
+                recalcFromRate(row);
+            });
+
+            $(".rate-input").off('input').on('input', function() {
+                let row = $(this).closest('.input-row');
+                recalcFromRate(row);
+            });
+
+            $(".amount-input").off('input').on('input', function() {
+                let row = $(this).closest('.input-row');
+                recalcFromAmount(row);
+            });
+
+            $(".remove-button").off('click').on('click', function() {
+                if ($(".input-row").length > 1) {
+                    $(this).closest('.input-row').remove();
+                    calculateTotalSum();
+                }
+            });
+        }
+
+        function syncQty(row) {
+            let qty = parseFloat(row.find(".qty-input").val()) || 0;
+            row.find(".unitQty-input").val(qty);
+            row.find(".received-input").val(qty);
+        }
+
+        function recalcFromRate(row) {
+            let qty = parseFloat(row.find(".qty-input").val()) || 0;
+            let rate = parseFloat(row.find(".rate-input").val()) || 0;
+
+            if (qty <= 0) return;
+
+            let amount = qty * rate;
+            row.find(".amount-input").val(amount.toFixed(2));
+
+            calculateTotalSum();
+        }
+
+        function recalcFromAmount(row) {
+            let qty = parseFloat(row.find(".qty-input").val()) || 0;
+            let amount = parseFloat(row.find(".amount-input").val()) || 0;
+
+            if (qty <= 0) return;
+
+            let rate = amount / qty;
+            row.find(".rate-input").val(rate.toFixed(2));
+
+            calculateTotalSum();
+        }
+
+        function calculateTotalSum() {
+            let sum = 0;
+            $(".amount-input").each(function() {
+                sum += parseFloat($(this).val()) || 0;
+            });
+
+            $('#total_amount').text(`Total: ${formatCurrency(sum)}`);
+        }
+
+        bindEvents();
+    });
+</script>
+<!-- <script>
     let inputCounter = 0;
     window.addEventListener('load', function() {
         $("#add-input").click(function() {
@@ -256,4 +334,4 @@
         // Bind events on initial elements
         bindEvents();
     });
-</script>
+</script> -->
