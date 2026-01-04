@@ -245,4 +245,25 @@ class CustomerController extends Controller
             'transactions' => $sortedTransactions->values()->all() // Converts collection to array
         ], 200);
     }
+
+    public function lastDelivery(Customer $customer)
+    {
+        $lastOrder = $customer->orders()
+            ->whereNotNull('delivery_area_id')
+            ->latest()
+            ->first();
+
+        if (!$lastOrder) {
+            return response()->json([
+                'status' => 'empty'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'delivery_area_id'   => $lastOrder->delivery_area_id,
+            'delivery_area_name' => optional($lastOrder->deliveryArea)->name,
+            'delivery_address'   => $lastOrder->delivery_address,
+        ]);
+    }
 }

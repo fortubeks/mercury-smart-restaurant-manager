@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Customers
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
     Route::get('search/customers', [\App\Http\Controllers\CustomerController::class, 'search'])->name('search.customers');
+    Route::get('/customers/{customer}/last-delivery', [\App\Http\Controllers\CustomerController::class, 'lastDelivery'])->name('customers.last-delivery');
 
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);

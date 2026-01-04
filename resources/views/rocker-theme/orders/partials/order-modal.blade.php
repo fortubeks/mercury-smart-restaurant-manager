@@ -171,11 +171,34 @@
         });
 
         // Select customer
-        $(document).on('click', '.customer-option', function() {
+        $(document).on('click', '.customer-option', async function() {
             const customerId = $(this).data('id');
             $('#selected-customer-id').val(customerId);
             //update order info
             updateOrderInformation('selected_customer_id');
+            //update last address
+            baseUrl = "{{url('/')}}"
+            try {
+                const response = await fetch(`${baseUrl}/customers/${customerId}/last-delivery`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    $('#delivery-area').val(data.delivery_area_name ?? '');
+                    $('#delivery-address').val(data.delivery_address ?? '');
+
+                    // persist to cart/order info
+                    updateOrderInformation('delivery_area_name');
+                    updateOrderInformation('delivery_address');
+                }
+            } catch (e) {
+                console.error('Failed to fetch last delivery info', e);
+            }
+
             $('#step-customer').addClass('d-none');
             $('#step-delivery').removeClass('d-none');
         });
