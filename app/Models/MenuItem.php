@@ -46,7 +46,9 @@ class MenuItem extends Model
                 }
             }
 
-            return count($portion_counts) ? min($portion_counts) : 0;
+            return count($portion_counts)
+                ? max(0, min($portion_counts))
+                : 0;
         }
 
         // Case 2: Normal menu item (linked to ingredients)
@@ -65,7 +67,10 @@ class MenuItem extends Model
             }
         }
 
-        return count($portion_counts) ? min($portion_counts) : 0;
+        //return count($portion_counts) ? min($portion_counts) : 0;
+        return count($portion_counts)
+            ? max(0, min($portion_counts))
+            : 0;
     }
 
     public function menu()
