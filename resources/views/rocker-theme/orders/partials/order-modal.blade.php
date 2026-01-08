@@ -336,7 +336,7 @@
         });
 
         $('#to-summary').on('click', () => {
-            if (!$('#amount-paid').val() || !$('[name="payment_method"]').val()) {
+            if (!$('#amount-paid').val()) {
                 alert('Fill amount and payment method.');
                 return;
             }
