@@ -3,6 +3,58 @@
         cursor: pointer;
     }
 </style>
+<div class="modal fade" id="orderModalDineTakeOut" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Proceed</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{{ url('orders') }}">
+                    @csrf
+                    <!-- Step 3: Payment -->
+                    <div>
+                        <div class="tab-title">Add Payment</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="inputPrice" class="form-label">Payment Method</label>
+                                <select class="form-select" name="payment_method" required>
+                                    <option value="">--Select--</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="pos">POS</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="wallet">Wallet</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="phone">Bank Account</label>
+                                    <select class="form-select" name="bank_account_id">
+                                        <option value="">--Select--</option>
+                                        @foreach(getModelList('bank-accounts') as $bankAccount)
+                                        <option value="{{$bankAccount->id}}">{{$bankAccount->account_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="inputCompareatprice" class="form-label">Amount Paid</label>
+                                <input type="hidden" min="0" step="any" class="form-control" id="amount-paid" value="{{ $cartData['order_info']['total_amount'] ?? '' }}">
+                                <input type="number" min="0" step="any" class="form-control amount-paid" name="amount" value="{{ $cartData['order_info']['total_amount'] ?? '' }}">
+                            </div>
+                            <div class="d-flex justify-content-between mt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go back</button>
+                                <input type="hidden" name="order_cart_id" class="orderCartId" value="{{$orderCartId}}">
+                                <button type="submit" class="btn btn-success">Submit Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -106,7 +158,7 @@
                             </div>
                             <div class="col-12">
                                 <label for="inputCompareatprice" class="form-label">Amount Paid</label>
-                                <input type="number" min="0" step="any" class="form-control" name="amount" id="amount-paid" value="{{ $cartData['order_info']['total_amount'] ?? '' }}">
+                                <input type="number" min="0" step="any" class="form-control amount-paid" name="amount" value="{{ $cartData['order_info']['total_amount'] ?? '' }}">
                             </div>
                             <div class="d-flex justify-content-between mt-3">
                                 <button class="btn btn-secondary" type="button" id="back-to-delivery">Back</button>
@@ -168,6 +220,11 @@
                 }
                 $('#customer-results').html(html);
             });
+        });
+
+        $('#amount-paid').on('change', function() {
+            const amount = $('#amount-paid').val();
+            $('.amount-paid').val(parseFloat(amount || 0));
         });
 
         // Select customer
@@ -264,6 +321,7 @@
             }
 
             $('#amount-paid').val(parseFloat($('#amount-paid').val() || 0) + parseFloat($('#delivery-fee').val() || 0));
+            $('.amount-paid').val(parseFloat($('#amount-paid').val() || 0));
 
             //update order information
             updateOrderInformation('selected_delivery_area_id');

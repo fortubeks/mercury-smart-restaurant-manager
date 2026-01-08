@@ -244,6 +244,17 @@
 
 <script>
     var orderCartId = '{{ $orderCartId }}';
+
+    function updateModalTarget() {
+        const selected = $('input[name="order_type"]:checked').val();
+        const proceedButton = $('[data-bs-target^="#orderModal"]');
+
+        if (selected === 'dine_in' || selected === 'take_away') {
+            proceedButton.attr('data-bs-target', '#orderModalDineTakeout');
+        } else {
+            proceedButton.attr('data-bs-target', '#orderModal');
+        }
+    }
 </script>
 <script>
     window.addEventListener('load', function() {
@@ -255,6 +266,14 @@
         if (outletId) {
             $('#outlet').val(outletId);
         }
+
+
+
+        // Update on page load in case a radio is pre-selected
+        //updateModalTarget();
+
+        // Update whenever the radio changes
+        $('input[name="order_type"]').on('change', updateModalTarget);
 
         const itemsDiv = $('.menu-items');
         // Delegate the click event to a parent element (e.g., itemsDiv)

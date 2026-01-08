@@ -81,6 +81,7 @@
                                 <li>
                                     {{ $comboItem->name }} –
                                     {{ number_format($comboItem->pivot->qty, 2) }} portions
+                                    (Available[{{ $comboItem->calculateQuantity() }}])
                                 </li>
                                 @endforeach
                             </ul>
@@ -142,6 +143,7 @@
                                     {{ $ingredient->name }} –
                                     {{ number_format($ingredient->pivot->quantity_needed, 2) }}
                                     {{ $ingredient->unit_measurement ?? '' }}
+                                    (Available[{{ $ingredient->outletQtyForOutlet(outlet()->id) }}])
                                 </li>
                                 @endforeach
                             </ul>

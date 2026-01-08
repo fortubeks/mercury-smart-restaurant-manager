@@ -137,9 +137,9 @@ class CartController extends Controller
         }
 
         // Validate price (optional: ensure price does not exceed the actual price)
-        if ($price > calculateTotalBillAmount($item->price)) {
-            return response()->json(['status' => 'error', 'msg' => 'Invalid price'], 422);
-        }
+        // if ($price > calculateTotalBillAmount($item->price)) {
+        //     return response()->json(['status' => 'error', 'msg' => 'Invalid price'], 422);
+        // }
 
         // Update cart item
         $cart[$cartOrderId]['items'][$itemId]['quantity'] = $quantity;

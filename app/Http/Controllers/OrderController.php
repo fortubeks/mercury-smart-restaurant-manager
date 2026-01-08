@@ -120,10 +120,14 @@ class OrderController extends Controller
         $customer_id = $cart[$orderCartId]['order_info']['customer_id'] ?? null;
         $delivery_address = $cart[$orderCartId]['order_info']['delivery_address'] ?? null;
         $delivery_rider_id = $cart[$orderCartId]['order_info']['delivery_rider_id'] ?? null;
-        $delivery_fee = $cart[$orderCartId]['order_info']['delivery_fee'] ?? null;
+        $delivery_fee = $cart[$orderCartId]['order_info']['delivery_fee'] ?? 0;
         $total_amount += $delivery_fee;
 
-        $delivery_area_id = $cart[$orderCartId]['order_info']['delivery_area_id'] ? $this->getDeliveryArea($cart[$orderCartId]['order_info']['delivery_area_id']) : null;
+        $deliveryAreaId = $cart[$orderCartId]['order_info']['delivery_area_id'] ?? null;
+
+        $delivery_area_id = $deliveryAreaId
+            ? $this->getDeliveryArea($deliveryAreaId)
+            : null;
 
         $request->merge([
             'total_amount' => $total_amount,

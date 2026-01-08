@@ -113,4 +113,11 @@ class StoreItem extends Model
     {
         return $this->stores->sum(fn($store) => $store->pivot->qty ?? 0);
     }
+
+    public function outletQtyForOutlet($outletId)
+    {
+        return $this->outletStoreItem()
+            ->where('outlet_id', $outletId)
+            ->value('qty') ?? 0;
+    }
 }
