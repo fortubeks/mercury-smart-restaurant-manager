@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MenuItemOrder extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'menu_item_id',
         'order_id',
