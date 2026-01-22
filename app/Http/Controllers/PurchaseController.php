@@ -429,4 +429,19 @@ class PurchaseController extends Controller
 
         return response()->json($purchases);
     }
+
+    public function showUnpaidPurchases()
+    {
+        $storeId = restaurant()->defaultStore->id;
+
+        $purchases = Purchase::where('store_id', $storeId)
+            ->whereRaw('(SELECT COALESCE(SUM(amount),0)
+                     FROM outgoing_payments
+                     WHERE outgoing_payments.payable_id = purchases.id
+                     AND outgoing_payments.payable_type = "App\\Models\\Purchase") < purchases.total_amount')
+            ->orderBy('purchase_date', 'desc')
+            ->get();
+
+        return theme_view('purchases.unpaid-purchases', compact('purchases'));
+    }
 }

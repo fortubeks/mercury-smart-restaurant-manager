@@ -432,4 +432,20 @@ class ExpenseController extends Controller
 
         return response()->json($expenses);
     }
+
+    public function showUnpaidExpenses()
+    {
+        $restaurantId = restaurantId();
+        $expenses = Expense::where('restaurant_id', $restaurantId)
+            ->whereRaw('(
+        SELECT COALESCE(SUM(amount), 0)
+        FROM outgoing_payments
+        WHERE payable_id = expenses.id
+          AND payable_type = ?
+    ) < expenses.amount', ['App\Models\Expense'])
+            ->orderBy('expense_date', 'desc')
+            ->get();
+
+        return theme_view('expenses.unpaid-expenses', compact('expenses'));
+    }
 }

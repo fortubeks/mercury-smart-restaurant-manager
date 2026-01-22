@@ -137,7 +137,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-around text-center mb-3">
                     <div class="col-12">
-                        <h6> Recent Purchases (<a href="{{ route('purchases.all') }}">View All</a>) (<a href="{{ route('purchases.summary') }}">View Summary</a>)</h6>
+                        <h6> Recent Purchases (<a href="{{ route('purchases.all') }}">View All</a>) (<a href="{{ route('purchases.summary') }}">View Summary</a>)
+                            (<a href="{{ route('purchases.unpaid') }}">View Unpaid</a>)</h6>
                     </div>
                 </div>
                 <div class="table-responsive">

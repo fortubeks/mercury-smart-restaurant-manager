@@ -137,7 +137,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-around mb-3 text-center">
                     <div class="col-12">
-                        <h6> Recent Expenses (<a href="{{ route('expenses.all') }}">View All</a>) (<a href="{{ route('expenses.summary') }}">View Summary</a>)</h6>
+                        <h6> Recent Expenses (<a href="{{ route('expenses.all') }}">View All</a>) (<a href="{{ route('expenses.summary') }}">View Summary</a>)
+                            (<a href="{{ route('expenses.unpaid') }}">View Unpaid</a>)</h6>
                     </div>
                 </div>
 

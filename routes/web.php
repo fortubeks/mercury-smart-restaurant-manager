@@ -121,16 +121,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('outgoing-payments', \App\Http\Controllers\OutgoingPaymentController::class);
     Route::get('outgoing-payments/search', [\App\Http\Controllers\OutgoingPaymentController::class, 'search'])->name('outgoing-payments.search');
     Route::post('outgoing-payment/purchase', [\App\Http\Controllers\OutgoingPaymentController::class, 'storePurchasePayment'])->name('outgoing-payments.purchase.store');
+    Route::post('outgoing-payment/expense', [\App\Http\Controllers\OutgoingPaymentController::class, 'storeExpensePayment'])->name('outgoing-payments.expense.store');
     Route::resource('incoming-payments', \App\Http\Controllers\IncomingPaymentController::class);
     //Expenses
     Route::resource('expenses', \App\Http\Controllers\ExpenseController::class);
     Route::get('expense/all', [\App\Http\Controllers\ExpenseController::class, 'allExpenses'])->name('expenses.all');
     Route::get('expense/summary', [\App\Http\Controllers\ExpenseController::class, 'summary'])->name('expenses.summary');
+    Route::get('expense/unpaid', [\App\Http\Controllers\ExpenseController::class, 'showUnpaidExpenses'])->name('expenses.unpaid');
     Route::get('expense/search', [\App\Http\Controllers\ExpenseController::class, 'search'])->name('expense.search');
     //Purchases
     Route::resource('purchases', \App\Http\Controllers\PurchaseController::class);
     Route::get('purchase/all', [\App\Http\Controllers\PurchaseController::class, 'allExpenses'])->name('purchases.all');
     Route::get('purchase/summary', [\App\Http\Controllers\PurchaseController::class, 'summary'])->name('purchases.summary');
+    Route::get('purchase/unpaid', [\App\Http\Controllers\PurchaseController::class, 'showUnpaidPurchases'])->name('purchases.unpaid');
+
     Route::get('purchase/search', [\App\Http\Controllers\PurchaseController::class, 'search'])->name('purchases.search');
     //Suppliers
     Route::resource('suppliers', \App\Http\Controllers\SupplierController::class);

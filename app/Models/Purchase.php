@@ -71,4 +71,16 @@ class Purchase extends Model
     {
         return $this->morphMany(OutgoingPayment::class, 'payable');
     }
+
+    public function paymentStatus()
+    {
+        $status = "Not Paid";
+        if ($this->outgoingPayments()->sum('amount') >= $this->total_amount) {
+            $status = "All Paid";
+        }
+        if ($this->outgoingPayments()->sum('amount') < $this->total_amount  && $this->outgoingPayments()->sum('amount') > 0) {
+            $status = "Part Paid";
+        }
+        return $status;
+    }
 }
