@@ -25,6 +25,7 @@
                                     <option value="pos">POS</option>
                                     <option value="transfer">Transfer</option>
                                     <option value="wallet">Wallet</option>
+                                    <option value="credit">Credit</option>
                                 </select>
                             </div>
                             <div class="col-12">
