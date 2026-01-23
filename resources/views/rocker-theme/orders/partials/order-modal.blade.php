@@ -209,7 +209,10 @@
             if (query.length < 3) return;
 
             $.get('{{route("search.customers")}}', {
-                search: query
+                search: query,
+                headers: {
+                    'Accept': 'application/json'
+                },
             }, function(data) {
                 let html = '';
                 if (data.length) {

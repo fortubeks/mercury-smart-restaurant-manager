@@ -63,20 +63,33 @@
 @include('rocker-theme.layouts.partials.delete-modal')
 
 <script>
+    let timer;
     window.addEventListener('load', function() {
         $('#search-customer').focus();
         $('#search-customer').on('input', function() {
-            var search = $(this).val();
-            $.ajax({
-                url: "{{ route('search.customers') }}",
-                method: 'GET',
-                data: {
-                    search: search
-                },
-                success: function(response) {
-                    $('#customers-table tbody').html(response);
-                }
-            });
+            clearTimeout(timer);
+            let search = $(this).val();
+
+            if (search.length < 3) {
+                $('#customers-table tbody').empty();
+                return;
+            }
+
+            timer = setTimeout(() => {
+                $.ajax({
+                    url: "{{ route('search.customers') }}",
+                    method: 'GET',
+                    data: {
+                        search
+                    },
+                    headers: {
+                        'Accept': 'text/html'
+                    },
+                    success: function(html) {
+                        $('#customers-table tbody').html(html);
+                    }
+                });
+            }, 300);
         });
 
     });

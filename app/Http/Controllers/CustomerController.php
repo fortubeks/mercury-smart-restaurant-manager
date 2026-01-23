@@ -151,31 +151,31 @@ class CustomerController extends Controller
         return json_encode($customer);
     }
 
+    protected function customerSearchQuery(Request $request)
+    {
+        return Customer::where('restaurant_id', restaurantId())
+            ->when($request->search, function ($q) use ($request) {
+                $q->where(function ($q) use ($request) {
+                    $q->where('first_name', 'LIKE', "%{$request->search}%")
+                        ->orWhere('last_name', 'LIKE', "%{$request->search}%")
+                        ->orWhere('phone', 'LIKE', "%{$request->search}%");
+                });
+            });
+    }
+
     public function search(Request $request)
     {
-        $searchValue = $request->input('search');
-        $restaurantId = restaurantId();
+        $customers = $this->customerSearchQuery($request)
+            ->limit(20)
+            ->get();
 
-        logger()->info('Searching for customers with value: ' . $searchValue);
-
-        // Perform the search based on partial string match
-        $query = Customer::where('restaurant_id', $restaurantId);
-        if ($searchValue) {
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('first_name', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('last_name', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('phone', 'LIKE', "%{$searchValue}%");
-            });
+        // JSON consumers (API / another page)
+        if ($request->expectsJson()) {
+            return response()->json($customers);
         }
 
-        if ($request->ajax()) {
-            return response()->json($query->get());
-        }
-
-        // Return only the HTML of the updated table rows
-        return theme_view('customers.partials.search-results', [
-            'customers' => $query->paginate(50),
-        ]);
+        // HTML consumers (AJAX partials)
+        return theme_view('customers.partials.search-results', compact('customers'));
     }
 
     public function customerTransactions(Customer $customer)
