@@ -158,19 +158,24 @@ class OrderController extends Controller
 
             $orderItemService->saveItemsAndUpdateStock($order, $items);
 
-            //utilise the payment service to store the incoming payment
-            $paymentService->processPayment(
-                [
-                    'payment_method' => $request->payment_method,
-                    'amount' => $total_amount,
-                    'payable_type' => get_class($order),
-                    'payable_id' => $order->id,
-                    'restaurant_id' => restaurantId(),
-                    'description' => 'Payment for Order #' . $order->reference,
-                    'bank_account_id' => $request->bank_account_id,
-                    'date_of_payment' => $request->date_of_payment
-                ]
-            );
+            //utilise the payment service to store the incoming payment if payment is not credit
+            if ($request->payment_method != 'credit') {
+                $paymentService->processPayment(
+                    [
+                        'payment_method' => $request->payment_method,
+                        'amount' => $total_amount,
+                        'payable_type' => get_class($order),
+                        'payable_id' => $order->id,
+                        'restaurant_id' => restaurantId(),
+                        'description' => 'Payment for Order #' . $order->reference,
+                        'bank_account_id' => $request->bank_account_id,
+                        'date_of_payment' => $request->date_of_payment
+                    ]
+                );
+            } else {
+                $order->status = 'unsettled';
+                $order->save();
+            }
 
             // Commit the transaction
             DB::commit();
@@ -210,16 +215,16 @@ class OrderController extends Controller
         return $deliveryAreaId;
     }
 
-    public function addRestaurantOrderPayment(Request $request)
+    public function addOrderPayment(Request $request, IncomingPaymentService $paymentService)
     {
         $request->validate([
-            'mode_of_payment' => 'required',
             'date_of_payment' => 'required',
+            'mode_of_payment' => 'required',
             'amount' => 'required',
-            'restaurant_order_id' => 'required'
+            'order_id' => 'required'
         ]);
 
-        $order = RestaurantOrder::findOrFail($request->restaurant_order_id);
+        $order = Order::findOrFail($request->order_id);
         $wallet = null;
 
         if ($request->mode_of_payment == "wallet") {
@@ -231,13 +236,12 @@ class OrderController extends Controller
 
         //check if mode of payment is wallet, if wallet, check if wallet is well funded, return back with error if not
         if ($request->mode_of_payment == "wallet" && $request->amount > $wallet->balance) {
-            return back()->with('error', 'Insufficient balance to deduct from.');
+            $walletOwner = $wallet->customer ? $wallet->customer : $wallet->company;
+            return back()->with('error', 'Insufficient balance to deduct from ' . $walletOwner->name() . ' wallet.');
         }
 
         if ($request->amount > $order->amountDue()) {
-            return back()->withErrors([
-                'error' => 'Amount to pay is greater than credit. Please try again.',
-            ]);
+            return back()->with('error', 'Amount to pay is greater than amount outstanding. Please try again.');
         }
         DB::beginTransaction();
         try {
@@ -263,16 +267,20 @@ class OrderController extends Controller
             } else {
                 eraseCreditPayment($order);
             }
-            $payment_controller = new PaymentController();
-            $payment_controller->addPayment(
-                $request,
-                $payable_type,
-                $payable_id,
-                $request->amount,
-                $wallet,
-                $order->restaurant_id,
-                'Restaurant Order Payment'
+
+            $paymentService->processPayment(
+                [
+                    'payment_method' => $request->payment_method,
+                    'amount' => $request->amount,
+                    'payable_type' => get_class($order),
+                    'payable_id' => $order->id,
+                    'restaurant_id' => restaurantId(),
+                    'description' => 'Payment for Order #' . $order->reference,
+                    'bank_account_id' => $request->bank_account_id,
+                    'date_of_payment' => $request->date_of_payment
+                ]
             );
+
 
             DB::commit();
         } catch (\Exception $e) {
@@ -282,14 +290,12 @@ class OrderController extends Controller
 
             // Redirect the user back to the previous page with an error message
             return back()->withErrors([
-                'error' => 'An error occurred. Please try again.',
+                'error' => 'An error occurred. ' . $e->getMessage(),
             ]);
         }
 
         return back()->with('success', 'Payment added successfully');
     }
-
-
 
     public function destroy(Order $order)
     {

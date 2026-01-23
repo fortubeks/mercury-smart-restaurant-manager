@@ -119,6 +119,12 @@ class Order extends Model
         return $payment_detail;
     }
 
+    public function amountDue()
+    {
+        $totalPaid = $this->payments->sum('amount');
+        return $this->total_amount - $totalPaid;
+    }
+
     public function getPaymentStatus()
     {
         //return an array with the payment status and total amount paid

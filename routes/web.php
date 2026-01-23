@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Orders
     Route::resource('orders', \App\Http\Controllers\OrderController::class);
     Route::post('/order/assign-rider', [\App\Http\Controllers\OrderController::class, 'assignRider'])->name('orders.assignRider');
+    Route::post('/order/add-payment', [\App\Http\Controllers\OrderController::class, 'addPayment'])->name('order.add-payment');
 
     //Delivery Riders
     Route::resource('delivery-riders', \App\Http\Controllers\DeliveryRiderController::class);

@@ -11,7 +11,12 @@
                     <div class="position-relative">
                         <h5>{{$order->reference}}</h5>
                     </div>
-                    <div class="ms-auto"><a href="{{url('orders')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="lni lni-chevron-left-circle"></i>Back to Orders</a></div>
+                    <div class="ms-auto">
+                        <a href="{{url('orders')}}" class="btn btn-primary radius-30 mt-2 mt-lg-0"><i class="lni lni-chevron-left-circle"></i>Back to Orders</a>
+                        @if(!$order->hasBeenPaid())
+                        <a href="#" class="btn btn-primary radius-30 mt-2 mt-lg-0" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="bx bxs-credit-card"></i>Add Payment</a>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,6 +158,98 @@
             </div>
         </div>
         @include('rocker-theme.layouts.partials.delete-modal')
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Close out order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs nav-primary" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#add-payment" role="tab"
+                                aria-selected="true">
+                                <div class="d-flex align-items-center">
+                                    <div class="tab-icon"><i class="bx bx-home font-18 me-1"></i>
+                                    </div>
+                                    <div class="tab-title">Add Payment</div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content py-3">
+                        <div class="tab-pane fade active show" id="add-payment" role="tabpanel">
+                            <form method="post" action="{{ route('order.add-payment') }}">
+                                @csrf
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label for="inputPrice" class="form-label">Mode of Payment</label>
+                                        <select class="form-select" name="mode_of_payment" required>
+                                            <option value="">--Select--</option>
+                                            <option value="cash">Cash</option>
+                                            <option value="pos">POS</option>
+                                            <option value="transfer">Transfer</option>
+                                            <option value="wallet">Wallet</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="phone">Bank Account</label>
+                                            <select class="form-select" name="bank_account_id">
+                                                <option value="">--Select--</option>
+                                                @foreach (getModelList('bank-accounts') as $bankAccount)
+                                                <option value="{{$bankAccount->id}}">{{$bankAccount->account_name}} -
+                                                    {{$bankAccount->account_number}}
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="phone">Payment Receipt Reference <small class="text-danger">(Required only if POS/Transfer method is selected)</small></label>
+                                        <input type="text" disabled id="reference_number" class="form-control" name="reference_number" placeholder="Reference Number">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="inputCompareatprice" class="form-label">Date of Payment</label>
+                                        <input type="date" required class="form-control datepicker flatpickr-input active"
+                                            name="date_of_payment" data-toggle="flatpickr">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="inputCompareatprice" class="form-label">Amount Paid</label>
+                                        <input type="number" class="form-control" name="amount" id="amount-paid"
+                                            placeholder="00.00" max="{{$amount_due}}">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check form-check-primary">
+                                            <input class="form-check-input" type="checkbox" value="yes" name="settlement" id="flexCheckSuccess">
+                                            <label class="form-check-label" for="flexCheckSuccess">
+                                                Settlement for a different shift?
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="d-grid">
+                                            <input type="hidden" name="order_id" value="{{ $order->id }}">
+                                            <button type="submit" class="btn btn-primary">Save & close order</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go back</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
