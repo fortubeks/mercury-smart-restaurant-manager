@@ -67,47 +67,48 @@ class OrderItemService
             }
         }
     }
-    // public function saveItemsAndUpdateStock(Order $order, array $items)
-    // {
-    //     foreach ($items as $itemId => $item) {
-    //         $orderItem = MenuItemOrder::create([
-    //             'order_id' => $order->id,
-    //             'menu_item_id' => $itemId,
-    //             'qty' => $item['quantity'],
-    //             'sub_total' => $item['total'],
-    //             'tax_rate' => calculateTaxRate(),
-    //             'tax_amount' => $item['tax'],
-    //             'discount_rate' => 0,
-    //             'discount_amount' => 0,
-    //             'total_amount' => $item['total'],
-    //         ]);
 
-    //         if (!restaurant()->appSetting->manage_stock) {
-    //             continue;
-    //         }
+    public function restoreItemsAndStock(Order $order)
+    {
+        if (!restaurant()->appSetting->manage_stock) {
+            return;
+        }
 
-    //         $menuItem = MenuItem::with(['components.outletStoreItem', 'outletStoreItems'])->find($itemId);
+        // Load everything needed in one go
+        $order->load([
+            'menuItems.components.ingredients.outletStoreItem',
+            'menuItems.ingredients.outletStoreItem'
+        ]);
 
-    //         if ($menuItem->is_combo) {
-    //             foreach ($menuItem->components as $component) {
-    //                 $outletStoreItem = $component->outletStoreItem;
-    //                 if ($outletStoreItem) {
-    //                     $outletStoreItem->qty -= $item['quantity'] * $component->pivot->quantity_used;
-    //                     $outletStoreItem->save();
-    //                 }
-    //             }
-    //         } elseif ($menuItem->outletStoreItems->isNotEmpty()) {
-    //             foreach ($menuItem->outletStoreItems as $storeItem) {
-    //                 $storeItem->qty -= $item['quantity'] * $storeItem->pivot->quantity_used;
-    //                 $storeItem->save();
-    //             }
-    //         } else {
-    //             $outletStoreItem = $menuItem->outletStoreItem ?? null;
-    //             if ($outletStoreItem) {
-    //                 $outletStoreItem->qty -= $item['quantity'];
-    //                 $outletStoreItem->save();
-    //             }
-    //         }
-    //     }
-    // }
+        foreach ($order->menuItems as $menuItem) {
+            $orderedQty = $menuItem->pivot->qty;
+
+            // Combo menu items
+            if ($menuItem->is_combo) {
+                foreach ($menuItem->components as $component) {
+                    foreach ($component->ingredients as $ingredient) {
+                        $outletStoreItem = $ingredient->outletStoreItem;
+
+                        if ($outletStoreItem) {
+                            $restoreQty = $orderedQty * $ingredient->pivot->quantity_needed;
+                            $outletStoreItem->qty += $restoreQty;
+                            $outletStoreItem->save();
+                        }
+                    }
+                }
+            }
+            // Regular menu items
+            else {
+                foreach ($menuItem->ingredients as $ingredient) {
+                    $outletStoreItem = $ingredient->outletStoreItem;
+
+                    if ($outletStoreItem) {
+                        $restoreQty = $orderedQty * $ingredient->pivot->quantity_needed;
+                        $outletStoreItem->qty += $restoreQty;
+                        $outletStoreItem->save();
+                    }
+                }
+            }
+        }
+    }
 }

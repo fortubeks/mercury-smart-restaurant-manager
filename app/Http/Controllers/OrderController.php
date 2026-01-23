@@ -297,7 +297,7 @@ class OrderController extends Controller
         return back()->with('success', 'Payment added successfully');
     }
 
-    public function destroy(Order $order)
+    public function destroy(Order $order, OrderItemService $orderItemService)
     {
         //authorize
         //$this->authorize('delete', $order);
@@ -330,32 +330,13 @@ class OrderController extends Controller
                 }
                 $settlement->delete();
             }
-            if (restaurant()->appSetting->manage_stock == true) {
-                foreach ($order->menuItems as $menuItem) {
+            // Restore stock
+            $orderItemService->restoreItemsAndStock($order);
 
-                    if ($menuItem->is_combo == 1) {
-                        // Combo item: restore inventory for each component
-                        foreach ($menuItem->components as $component) {
-                            $outlet_store_item = $component->outletStoreItem;
-                            if ($outlet_store_item) {
-                                $outlet_store_item->qty += $menuItem->pivot->qty * $component->pivot->quantity_used;
-                                $outlet_store_item->save();
-                            }
-                        }
-                    } elseif ($menuItem->outletStoreItems && $menuItem->outletStoreItems->isNotEmpty()) {
-                        // Regular item with multiple linked ingredients (via pivot)
-                        foreach ($menuItem->outletStoreItems as $outletStoreItem) {
-                            $outletStoreItem->qty += $menuItem->pivot->qty * $outletStoreItem->pivot->quantity_used;
-                            $outletStoreItem->save();
-                        }
-                    } elseif ($menuItem->outletStoreItem) {
-                        // Regular item directly linked to one outlet store item
-                        $outlet_store_item = $menuItem->outletStoreItem;
-                        $outlet_store_item->qty += $menuItem->pivot->qty;
-                        $outlet_store_item->save();
-                    }
-                }
-            }
+            // Delete order items
+            $order->menuItems()->detach();
+
+            // Delete the order
             $order->delete();
             DB::commit();
         } catch (\Exception $e) {
