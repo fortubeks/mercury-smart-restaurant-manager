@@ -209,7 +209,7 @@
             if (query.length < 3) return;
 
             $.get('{{route("search.customers")}}', {
-                q: query
+                search: query
             }, function(data) {
                 let html = '';
                 if (data.length) {

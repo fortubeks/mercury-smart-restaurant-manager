@@ -154,16 +154,17 @@ class CustomerController extends Controller
     public function search(Request $request)
     {
         $searchValue = $request->input('search');
+        $restaurantId = restaurantId();
+
+        logger()->info('Searching for customers with value: ' . $searchValue);
 
         // Perform the search based on partial string match
-        $query = Customer::where('restaurant_id', restaurantId());
+        $query = Customer::where('restaurant_id', $restaurantId);
         if ($searchValue) {
             $query->where(function ($q) use ($searchValue) {
-                $q->where(function ($q) use ($searchValue) {
-                    $q->where('first_name', 'LIKE', "%$searchValue%")
-                        ->orWhere('last_name', 'LIKE', "%$searchValue%");
-                })
-                    ->orWhere('phone', 'LIKE', "%$searchValue%");
+                $q->where('first_name', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('last_name', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('phone', 'LIKE', "%{$searchValue}%");
             });
         }
 
