@@ -37,6 +37,7 @@
             </a>
             <ul>
                 <li> <a href="{{ route('menu-items.index') }}"><i class='bx bx-radio-circle'></i>Menu Items</a></li>
+                <li> <a href="{{ route('prepared-outlet-menu-items.create') }}"><i class='bx bx-radio-circle'></i>Add Prepared Menu Items</a></li>
                 <li> <a href="{{ route('menu-categories.index') }}"><i class='bx bx-radio-circle'></i>Menu Item Categories</a></li>
                 <li> <a href="{{ route('menu-items.mapping-form') }}"><i class='bx bx-radio-circle'></i>Map Menu Items</a></li>
                 <li> <a href="{{ route('menu-items.import.form') }}"><i class='bx bx-radio-circle'></i>Import Menu Items</a></li>

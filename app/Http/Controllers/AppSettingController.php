@@ -37,6 +37,7 @@ class AppSettingController extends Controller
             'manage_stock' => $request->boolean('manage_stock'),
             'include_tax' => $request->boolean('include_tax'),
             'enable_delivery_rider' => $request->boolean('enable_delivery_rider'),
+            'inventory_style' => $request->input('inventory_style', 'ingredient'),
         ]);
 
         // Sync selected module IDs, default to empty array if none sent

@@ -32,45 +32,152 @@ class MenuItem extends Model
             return 100;
         }
 
+        /*
+     |-----------------------------------------
+     | PREPARED MODE (BUFFET / COOKED STOCK)
+     |-----------------------------------------
+     */
+        if (restaurant()->appSetting->inventory_style === 'prepared') {
+
+            // preparedStock should be eager loaded where possible
+            $preparedItem = $this->relationLoaded('preparedStock')
+                ? $this->preparedStock
+                : $this->preparedStock()->first();
+
+            if ($this->is_combo) {
+
+                $portionCounts = [];
+
+                foreach ($this->components as $component) {
+
+                    // recursive call, but force prepared check
+                    $stockQty  = $component->calculateQuantity(true);
+                    $qtyNeeded = $component->pivot->qty;
+
+                    if ($qtyNeeded > 0) {
+                        $portionCounts[] = floor($stockQty / $qtyNeeded);
+                    }
+                }
+                return count($portionCounts)
+                    ? max(0, min($portionCounts))
+                    : 0;
+            }
+
+            return $preparedItem
+                ? max(0, (int) floor($preparedItem->qty))
+                : 0;
+        }
+
+        /*
+     |-----------------------------------------
+     | INGREDIENT MODE (your existing logic)
+     |-----------------------------------------
+     */
+
         // Case 1: Combo item (combination of other menu items)
         if ($this->is_combo) {
-            $portion_counts = [];
+
+            $portionCounts = [];
 
             foreach ($this->components as $component) {
-                // recursive call, but force ingredient check
-                $stock_qty = $component->calculateQuantity(true);
-                $qty_needed = $component->pivot->qty;
 
-                if ($qty_needed > 0) {
-                    $portion_counts[] = floor($stock_qty / $qty_needed);
+                // recursive call, but force ingredient check
+                $stockQty  = $component->calculateQuantity(true);
+                $qtyNeeded = $component->pivot->qty;
+
+                if ($qtyNeeded > 0) {
+                    $portionCounts[] = floor($stockQty / $qtyNeeded);
                 }
             }
 
-            return count($portion_counts)
-                ? max(0, min($portion_counts))
+            return count($portionCounts)
+                ? max(0, min($portionCounts))
                 : 0;
         }
 
         // Case 2: Normal menu item (linked to ingredients)
-        $portion_counts = [];
+
+        $portionCounts = [];
 
         foreach ($this->ingredients as $ingredient) {
+
             $outletStoreItem = $ingredient->outletStoreItem ?? null;
 
-            if ($outletStoreItem && $ingredient->pivot) {
-                $stock_qty = $outletStoreItem->qty;
-                $qty_needed = $ingredient->pivot->quantity_needed;
+            if (!$outletStoreItem || !$ingredient->pivot) {
+                continue;
+            }
 
-                if ($qty_needed > 0) {
-                    $portion_counts[] = floor($stock_qty / $qty_needed);
-                }
+            $stockQty  = $outletStoreItem->qty;
+            $qtyNeeded = $ingredient->pivot->quantity_needed;
+
+            if ($qtyNeeded > 0) {
+                $portionCounts[] = floor($stockQty / $qtyNeeded);
             }
         }
 
-        //return count($portion_counts) ? min($portion_counts) : 0;
-        return count($portion_counts)
-            ? max(0, min($portion_counts))
+        return count($portionCounts)
+            ? max(0, min($portionCounts))
             : 0;
+    }
+
+    // public function calculateQuantity($forceCheck = false)
+    // {
+    //     // Return 100 if inventory management is disabled (only for top-level calls)
+    //     if (!restaurant()->appSetting->manage_stock && !$forceCheck) {
+    //         return 100;
+    //     }
+
+    //     if (restaurant()->appSetting->inventory_style === 'prepared') {
+    //         // For prepared items, get quantity from prepared stock
+    //         $preparedItem = $this->preparedStock()->first();
+    //         return $preparedItem ? max(0, floor($preparedItem->qty)) : 0;
+    //     }
+
+    //     // Case 1: Combo item (combination of other menu items)
+    //     if ($this->is_combo) {
+    //         $portion_counts = [];
+
+    //         foreach ($this->components as $component) {
+    //             // recursive call, but force ingredient check
+    //             $stock_qty = $component->calculateQuantity(true);
+    //             $qty_needed = $component->pivot->qty;
+
+    //             if ($qty_needed > 0) {
+    //                 $portion_counts[] = floor($stock_qty / $qty_needed);
+    //             }
+    //         }
+
+    //         return count($portion_counts)
+    //             ? max(0, min($portion_counts))
+    //             : 0;
+    //     }
+
+    //     // Case 2: Normal menu item (linked to ingredients)
+    //     $portion_counts = [];
+
+    //     foreach ($this->ingredients as $ingredient) {
+    //         $outletStoreItem = $ingredient->outletStoreItem ?? null;
+
+    //         if ($outletStoreItem && $ingredient->pivot) {
+    //             $stock_qty = $outletStoreItem->qty;
+    //             $qty_needed = $ingredient->pivot->quantity_needed;
+
+    //             if ($qty_needed > 0) {
+    //                 $portion_counts[] = floor($stock_qty / $qty_needed);
+    //             }
+    //         }
+    //     }
+
+    //     //return count($portion_counts) ? min($portion_counts) : 0;
+    //     return count($portion_counts)
+    //         ? max(0, min($portion_counts))
+    //         : 0;
+    // }
+
+    public function preparedStock()
+    {
+        return $this->hasOne(OutletPreparedMenuItem::class)
+            ->where('outlet_id', outlet()->id);
     }
 
     public function menu()

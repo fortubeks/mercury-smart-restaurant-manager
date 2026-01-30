@@ -68,6 +68,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //search menu items
     Route::get('search/menu-items', [\App\Http\Controllers\MenuItemController::class, 'search'])->name('search.menu-items');
 
+    // Prepared Outlet Menu Items
+    Route::resource('prepared-outlet-menu-items', \App\Http\Controllers\OutletPreparedMenuItemController::class)->only(['create', 'store']);
+
     //Cart routes
     Route::post('cart/add', [\App\Http\Controllers\CartController::class, 'add'])->name('cart.add');
     Route::post('cart/update', [\App\Http\Controllers\CartController::class, 'update'])->name('cart.update');

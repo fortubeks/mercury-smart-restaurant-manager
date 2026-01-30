@@ -26,6 +26,16 @@
                                 </div>
                                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
                                     <div class="form-check form-switch">
+                                        <input class="form-check-input" type="radio" name="inventory_style" role="switch" id="flexSwitchCheckDefault1a" value="prepared" {{ $appSetting->inventory_style == 'prepared' ? 'checked' : ''}}>
+                                        <label class="form-check-label" for="flexSwitchCheckDefault1a">Inventory Style: Prepared/Buffet style</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="radio" name="inventory_style" role="switch" id="flexSwitchCheckDefault1b" value="ingredient" {{ $appSetting->inventory_style == 'ingredient' ? 'checked' : ''}}>
+                                        <label class="form-check-label" for="flexSwitchCheckDefault1b">Inventory Style: Ingredient style</label>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 mb-3">
+                                    <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" name="include_tax" role="switch" id="flexSwitchCheckDefault3" {{ $appSetting->include_tax == 1 ? 'checked' : ''}}>
                                         <label class="form-check-label" for="flexSwitchCheckDefault3">Include Tax in Bill</label>
                                     </div>

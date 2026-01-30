@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\MenuItem;
 use App\Models\MenuItemOrder;
+use App\Models\OutletPreparedMenuItem;
 
 class OrderItemService
 {
@@ -37,32 +38,91 @@ class OrderItemService
                 continue;
             }
 
-            // Handle combo menu items
-            if ($menuItem->is_combo) {
-                foreach ($menuItem->components as $component) {
-                    foreach ($component->ingredients as $ingredient) {
-                        $outletStoreItem = $ingredient->outletStoreItem;
-
-                        if ($outletStoreItem) {
-                            $deductQty = $item['quantity'] * $ingredient->pivot->quantity_needed;
-                            $outletStoreItem->qty -= $deductQty;
-                            $outletStoreItem->save();
+            if (restaurant()->appSetting->inventory_style === 'prepared') {
+                // For prepared items, reduce from prepared stock
+                if ($menuItem->is_combo) {
+                    // For combo items, deduct stock for each component
+                    foreach ($menuItem->components as $component) {
+                        $preparedItem = OutletPreparedMenuItem::where('outlet_id', $order->outlet_id)
+                            ->where('menu_item_id', $component->id)->first();
+                        if ($preparedItem) {
+                            $deductQty = $item['quantity'] * $component->pivot->qty;
+                            $preparedItem->decrement('qty', $deductQty);
                         }
+                    }
+                } else {
+                    // For regular items, deduct stock directly
+                    $preparedItem = OutletPreparedMenuItem::where('outlet_id', $order->outlet_id)
+                        ->where('menu_item_id', $itemId)->first();
+                    if ($preparedItem) {
+                        $preparedItem->decrement('qty', $item['quantity']);
+                    }
+                }
+            } else {
+                // For regular items, deduct ingredient stock
+                $this->deductIngredientStock($menuItem, $item['quantity']);
+            }
+
+            // // Handle combo menu items
+            // if ($menuItem->is_combo) {
+            //     foreach ($menuItem->components as $component) {
+            //         foreach ($component->ingredients as $ingredient) {
+            //             $outletStoreItem = $ingredient->outletStoreItem;
+
+            //             if ($outletStoreItem) {
+            //                 $deductQty = $item['quantity'] * $ingredient->pivot->quantity_needed;
+            //                 $outletStoreItem->qty -= $deductQty;
+            //                 $outletStoreItem->save();
+            //             }
+            //         }
+            //     }
+            // }
+            // // Handle regular menu items
+            // else {
+            //     if ($menuItem->ingredients->isNotEmpty()) {
+            //         foreach ($menuItem->ingredients as $ingredient) {
+            //             $outletStoreItem = $ingredient->outletStoreItem;
+
+            //             if ($outletStoreItem) {
+            //                 $deductQty = $item['quantity'] * $ingredient->pivot->quantity_needed;
+            //                 $outletStoreItem->qty -= $deductQty;
+            //                 $outletStoreItem->save();
+            //             }
+            //         }
+            //     }
+            // }
+        }
+    }
+
+    public function deductIngredientStock(MenuItem $menuItem, int $orderedQty)
+    {
+        if (!restaurant()->appSetting->manage_stock) {
+            return;
+        }
+
+        // Combo menu items
+        if ($menuItem->is_combo) {
+            foreach ($menuItem->components as $component) {
+                foreach ($component->ingredients as $ingredient) {
+                    $outletStoreItem = $ingredient->outletStoreItem;
+
+                    if ($outletStoreItem) {
+                        $deductQty = $orderedQty * $ingredient->pivot->quantity_needed;
+                        $outletStoreItem->qty -= $deductQty;
+                        $outletStoreItem->save();
                     }
                 }
             }
-            // Handle regular menu items
-            else {
-                if ($menuItem->ingredients->isNotEmpty()) {
-                    foreach ($menuItem->ingredients as $ingredient) {
-                        $outletStoreItem = $ingredient->outletStoreItem;
+        }
+        // Regular menu items
+        else {
+            foreach ($menuItem->ingredients as $ingredient) {
+                $outletStoreItem = $ingredient->outletStoreItem;
 
-                        if ($outletStoreItem) {
-                            $deductQty = $item['quantity'] * $ingredient->pivot->quantity_needed;
-                            $outletStoreItem->qty -= $deductQty;
-                            $outletStoreItem->save();
-                        }
-                    }
+                if ($outletStoreItem) {
+                    $deductQty = $orderedQty * $ingredient->pivot->quantity_needed;
+                    $outletStoreItem->qty -= $deductQty;
+                    $outletStoreItem->save();
                 }
             }
         }
@@ -71,6 +131,32 @@ class OrderItemService
     public function restoreItemsAndStock(Order $order)
     {
         if (!restaurant()->appSetting->manage_stock) {
+            return;
+        }
+
+        if (restaurant()->appSetting->inventory_style === 'prepared') {
+            // For prepared items, reduce from prepared stock
+            foreach ($order->menuItems as $item) {
+                $itemId = $item->id;
+
+                if ($item->is_combo) {
+                    // For combo items, restore stock for each component
+                    foreach ($item->components as $component) {
+                        $preparedItem = OutletPreparedMenuItem::where('outlet_id', $order->outlet_id)
+                            ->where('menu_item_id', $component->id)->first();
+                        if ($preparedItem) {
+                            $restoreQty = $item->pivot->qty * $component->pivot->qty;
+                            $preparedItem->increment('qty', $restoreQty);
+                        }
+                    }
+                    continue;
+                }
+                $preparedItem = OutletPreparedMenuItem::where('outlet_id', $order->outlet_id)
+                    ->where('menu_item_id', $itemId)->first();
+                if ($preparedItem) {
+                    $preparedItem->decrement('qty', $item['quantity']);
+                }
+            }
             return;
         }
 

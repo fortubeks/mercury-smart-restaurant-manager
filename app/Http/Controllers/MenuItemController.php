@@ -20,7 +20,7 @@ class MenuItemController extends Controller
 
     public function index()
     {
-        $menuItems = MenuItem::where('outlet_id', outlet()->id)->get();
+        $menuItems = MenuItem::with('preparedStock')->where('outlet_id', outlet()->id)->get();
         $outlet = outlet();
         return theme_view('menu-items.index')->with(['menuItems' => $menuItems, 'currentOutlet' => $outlet]);
     }
@@ -107,7 +107,7 @@ class MenuItemController extends Controller
         $query = $request->input('query');
         $outletId = outlet()->id;
 
-        $menuItems = MenuItem::where('outlet_id', $outletId)
+        $menuItems = MenuItem::with('preparedStock')->where('outlet_id', $outletId)
             ->where('name', 'like', '%' . $query . '%')
             ->orderBy('name', 'asc')
             ->get();

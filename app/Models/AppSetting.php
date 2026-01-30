@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AppSetting extends Model
 {
-    protected $fillable = ['restaurant_id', 'manage_stock', 'kitchen_store', 'include_tax'];
+    protected $fillable = ['restaurant_id', 'manage_stock', 'kitchen_store', 'include_tax', 'enable_delivery_rider', 'inventory_style'];
 
     public function restaurant()
     {

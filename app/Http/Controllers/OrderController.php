@@ -72,7 +72,7 @@ class OrderController extends Controller
         $outletId = $user->outlet_id;
 
         $orderCartId = Carbon::now()->timestamp;
-        $menuItems = MenuItem::where('outlet_id', $outletId)->where('is_available', true)->orderBy('name', 'asc')->get();
+        $menuItems = MenuItem::with('preparedStock')->where('outlet_id', $outletId)->where('is_available', true)->orderBy('name', 'asc')->get();
         $menuCategories = MenuCategory::with('menuItems')->where('outlet_id', $outletId)->orderBy('name', 'asc')->get();
 
         //check if there is a sales record for the selected date. so that if there is, hide the submit buttons
